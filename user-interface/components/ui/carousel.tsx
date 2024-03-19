@@ -287,7 +287,7 @@ const CarouselNextBig = React.forwardRef<HTMLButtonElement, React.ComponentProps
         );
     }
 );
-CarouselNext.displayName = "CarouselNext";
+CarouselNextBig.displayName = "CarouselNextBig";
 
 export {
     type CarouselApi,
