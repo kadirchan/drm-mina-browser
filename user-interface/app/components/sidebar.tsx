@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Wallet, Bookmark, Store, Gamepad2, Search, Shapes } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import Web3wallet from "./web3wallet";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -74,14 +75,7 @@ export function Sidebar({ className }: SidebarProps) {
                             <Bookmark className="mr-2 h-4 w-4" />
                             Wishlist
                         </Button>
-                        <Button
-                            variant={currentPath == "/wallet" ? "secondary" : "ghost"}
-                            className="w-full justify-start"
-                            onClick={() => handleNavigate("/wallet")}
-                        >
-                            <Wallet className="mr-2 h-4 w-4" />
-                            Wallet
-                        </Button>
+                        <Web3wallet />
                     </div>
                 </div>
             </div>
