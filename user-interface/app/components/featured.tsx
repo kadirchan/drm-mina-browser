@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Carousel,
     CarouselContent,
@@ -11,8 +11,16 @@ import Autoplay from "embla-carousel-autoplay";
 import { Card, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { fetchGameData } from "@/lib/api";
+
+const ENDPOINT = "http://localhost:8080/";
 
 export default function Featured() {
+    const [data, setData] = useState(new Array<Game>());
+
+    useEffect(() => {
+        fetchGameData().then((data) => setData(data));
+    }, []);
     return (
         <div className="row-span-1 col-span-3 lg:col-span-5 flex justify-center py-8">
             <Carousel
@@ -28,12 +36,16 @@ export default function Featured() {
             >
                 <h3 className="mb-2 text-lg font-medium tracking-tight">Featured Games</h3>
                 <CarouselContent>
-                    {Array.from({ length: 9 }).map((_, index) => (
+                    {Array.from(data).map((game, index) => (
                         <CarouselItem key={index} className="md:basis-full lg:basis-full">
                             <div className="p-2">
-                                <Card>
+                                <Card className=" overflow-hidden">
                                     <CardContent className="flex items-center justify-center p-6 lg:aspect-video md:aspect-square">
-                                        Image
+                                        <img
+                                            src={ENDPOINT + game.cover}
+                                            alt={game.name}
+                                            className="w-full h-full object-cover"
+                                        />
                                     </CardContent>
                                     <CardFooter className="w-full flex justify-between">
                                         <CardDescription>Description</CardDescription>
