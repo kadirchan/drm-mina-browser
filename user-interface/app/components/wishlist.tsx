@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter } from "@/components/ui/
 import "./wishlist.css";
 import { fetchGameData } from "@/lib/api";
 
-const ENDPOINT = "http://localhost:8080/";
+const ENDPOINT = "http://165.227.156.229/";
 
 export default function WishlistItems() {
     const [data, setData] = useState(new Array<Game>());
