@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Carousel,
     CarouselContent,
@@ -8,18 +8,26 @@ import {
     CarouselPreviousBig,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { Card, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { fetchGameData } from "@/lib/api";
+import { fetchGameData, fetchWishlist } from "@/lib/api";
+import WalletAccount from "@/lib/walletData";
+import { useRouter } from "next/navigation";
 
-const ENDPOINT = "http://165.227.156.229/";
+const ENDPOINT = "http://localhost:8080/";
 
 export default function Featured() {
     const [data, setData] = useState(new Array<Game>());
+    const [wishlist, setWishlist] = useState(new Array<Game>());
 
-    useEffect(() => {
+    const router = useRouter();
+
+    useMemo(() => {
         fetchGameData().then((data) => setData(data));
+        fetchWishlist(WalletAccount.getWalletData().address || "123123").then((data) =>
+            setWishlist(data)
+        );
     }, []);
     return (
         <div className="row-span-1 col-span-3 lg:col-span-5 flex justify-center py-8">
@@ -39,7 +47,10 @@ export default function Featured() {
                     {Array.from(data).map((game, index) => (
                         <CarouselItem key={index} className="md:basis-full lg:basis-full">
                             <div className="p-2">
-                                <Card className=" overflow-hidden">
+                                <Card
+                                    className=" overflow-hidden"
+                                    onClick={() => router.push("/game-detail?" + game.name)}
+                                >
                                     <CardContent className="flex items-center justify-center p-6 lg:aspect-video md:aspect-square">
                                         <img
                                             src={ENDPOINT + game.cover}
@@ -48,9 +59,10 @@ export default function Featured() {
                                         />
                                     </CardContent>
                                     <CardFooter className="w-full flex justify-between">
-                                        <CardDescription>Description</CardDescription>
+                                        <CardTitle>{game.name}</CardTitle>
                                         <Button
-                                            onClick={() => {
+                                            onClick={(e) => {
+                                                e.stopPropagation();
                                                 console.log("Game bought");
                                                 toast("Game bought", {
                                                     description: "You have bought the game",

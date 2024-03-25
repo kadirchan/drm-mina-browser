@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Bookmark } from "lucide-react";
+import { toggleGameWishlist } from "@/lib/api";
+import WalletAccount from "@/lib/walletData";
 
 export default function Discounts() {
     const { toast } = useToast();
@@ -42,10 +44,15 @@ export default function Discounts() {
                                             -60%
                                         </Badge>
                                         <Bookmark
-                                            className=" absolute top-2 right-2 w-6 h-6"
-                                            onClick={() =>
-                                                toast({ description: "Added to wishlist" })
-                                            }
+                                            className=" absolute top-2 right-2 w-6 h-6 cursor-pointer "
+                                            onClick={() => {
+                                                toggleGameWishlist(
+                                                    WalletAccount.getWalletData().address ||
+                                                        "123123",
+                                                    index
+                                                );
+                                                toast({ description: "Added to wishlist" });
+                                            }}
                                         ></Bookmark>
                                     </CardContent>
                                     <CardFooter className="w-full flex justify-between">
