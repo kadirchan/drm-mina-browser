@@ -1,6 +1,8 @@
 declare global {
     interface Game {
+        id: number;
         name: string;
+        description: string;
         creator: string;
         cover: string;
         price: number;
@@ -89,4 +91,5 @@ declare global {
         };
     }
 }
+
 export {};
