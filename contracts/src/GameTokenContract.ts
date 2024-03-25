@@ -1,6 +1,7 @@
 import {
   Account,
   AccountUpdate,
+  AccountUpdateForest,
   Bool,
   DeployArgs,
   Field,
@@ -11,55 +12,13 @@ import {
   SmartContract,
   State,
   Struct,
+  TokenContract,
   UInt64,
   method,
   state,
 } from 'o1js';
 
-export class Identifiers extends Struct({
-  cpuId: Field,
-  systemSerial: Field,
-  systemUUID: Field,
-  baseboardSerial: Field,
-  macAddress: Field,
-  diskSerial: Field,
-}) {
-  constructor(
-    cpuId: Field,
-    systemSerial: Field,
-    systemUUID: Field,
-    baseboardSerial: Field,
-    macAddress: Field,
-    diskSerial: Field
-  ) {
-    super({
-      cpuId,
-      systemSerial,
-      systemUUID,
-      baseboardSerial,
-      macAddress,
-      diskSerial,
-    });
-    this.cpuId = cpuId;
-    this.systemSerial = systemSerial;
-    this.systemUUID = systemUUID;
-    this.baseboardSerial = baseboardSerial;
-    this.macAddress = macAddress;
-    this.diskSerial = diskSerial;
-  }
-  toFields() {
-    return [
-      this.cpuId,
-      this.systemSerial,
-      this.systemUUID,
-      this.baseboardSerial,
-      this.macAddress,
-      this.diskSerial,
-    ];
-  }
-}
-
-export class GameToken extends SmartContract {
+export class GameToken extends TokenContract {
   /**
    * Public key of the publisher of the game.
    */
@@ -93,48 +52,40 @@ export class GameToken extends SmartContract {
     this.account.permissions.set({
       ...Permissions.default(),
       editState: Permissions.proof(),
-      send: Permissions.proof(),
-      setTokenSymbol: Permissions.proof(),
-      setZkappUri: Permissions.proof(),
+      send: Permissions.impossible(),
+      setTokenSymbol: Permissions.signature(),
+      setZkappUri: Permissions.signature(),
     });
   }
 
-  init() {
+  @method async init() {
     this.account.provedState.getAndRequireEquals().assertFalse();
 
     super.init();
 
-    this.gamePrice.set(UInt64.from(100));
-    this.discount.set(UInt64.from(0));
+    this.gamePrice.set(UInt64.from(33333));
+    this.discount.set(UInt64.from(2121));
     this.network.timestamp.requireEquals(this.network.timestamp.get());
   }
 
-  @method mintGameToken() {
-    this.onlyPublisher();
-    this.token.mint({
-      address: this.address,
-      amount: 1_000_000_000_000n,
-    });
-  }
-
-  @method buyGameToken() {
+  @method mintGameToken(to: PublicKey) {
     const price = this.gamePrice.getAndRequireEquals();
     const discount = this.discount.getAndRequireEquals();
     const publisherAddress = this.publisher.getAndRequireEquals();
     const totalPrice = price.sub(discount);
 
-    // Provable.log(this.sender.toFields());
+    this.account.balance.requireBetween(UInt64.zero, UInt64.MAXINT());
+
+    const userAccount = Account(this.sender, this.deriveTokenId());
+    userAccount.balance.requireEquals(UInt64.zero);
+
     const accountUpdate = AccountUpdate.createSigned(this.sender);
-    const accountTokenUpdate = AccountUpdate.createSigned(
-      this.sender,
-      this.token.id
-    );
-    accountTokenUpdate.account.balance
-      .getAndRequireEquals()
-      .assertEquals(UInt64.zero);
     accountUpdate.send({ to: publisherAddress, amount: totalPrice });
 
-    this.token.send({ from: this.address, to: this.sender, amount: 1 });
+    this.internal.mint({
+      address: to,
+      amount: 1n,
+    });
   }
 
   @method setGamePrice(price: UInt64) {
@@ -164,5 +115,8 @@ export class GameToken extends SmartContract {
   onlyPublisher() {
     const publisher = this.publisher.getAndRequireEquals();
     AccountUpdate.create(publisher).requireSignature();
+  }
+  @method async approveBase(forest: AccountUpdateForest) {
+    this.checkZeroBalanceChange(forest);
   }
 }
