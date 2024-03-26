@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Sidebar } from "./components/sidebar";
 import { Toaster } from "@/components/ui/toaster";
+import SearchBar from "./components/searchbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,6 +32,7 @@ export default function RootLayout({
                             <div className="grid grid-cols-6">
                                 <Sidebar className="col-span-1 sticky top-0" />
                                 <main className=" overflow-hidden col-start-2 col-end-7">
+                                    <SearchBar></SearchBar>
                                     {children}
                                 </main>
                                 <Toaster />

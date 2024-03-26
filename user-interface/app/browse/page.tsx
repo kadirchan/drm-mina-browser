@@ -1,5 +1,9 @@
+"use client";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 
 export default function Browse() {
-    return <div>Browse</div>;
+    const router = useRouter();
+    const params = useSearchParams();
+    return <div>Browse {params}</div>;
 }
