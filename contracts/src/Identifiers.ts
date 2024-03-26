@@ -1,13 +1,5 @@
 import { Field, Struct } from 'o1js';
 
-/*
-  cpu_id: '52060A00FFFBEBBF',
-  system_serial: '5CD0273QXP',
-  system_uuid: '30444335-3732-5133-5850-bce92f8b2e35',
-  baseboard_serial: 'PKEAE028JDW0D7',
-  mac_addresses: [ 'bc:e9:2f:8b:2e:35', 'cc:d9:ac:b6:28:0d' ]
- */
-
 export type IdentifierType =
   | 'cpuId'
   | 'systemSerial'
