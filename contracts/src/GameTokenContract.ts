@@ -34,11 +34,6 @@ export class GameToken extends TokenContract {
    */
   @state(UInt64) discount = State<UInt64>();
 
-  // /**
-  //  * Timestamp of the proof.
-  //  */
-  // @state(UInt64) proofTimestamp = State<UInt64>();
-
   /**
    * Timeout interval for the proof to be valid.
    */
@@ -65,7 +60,7 @@ export class GameToken extends TokenContract {
 
     this.gamePrice.set(UInt64.from(33333));
     this.discount.set(UInt64.from(2121));
-    this.network.timestamp.requireEquals(this.network.timestamp.get());
+    this.timeoutInterval.set(UInt64.from(1000));
   }
 
   @method mintGameToken(to: PublicKey) {
@@ -107,6 +102,12 @@ export class GameToken extends TokenContract {
     const currentInterval = this.timeoutInterval.get();
     this.timeoutInterval.requireEquals(currentInterval);
     this.timeoutInterval.set(interval);
+  }
+
+  @method setPublisher(publisher: PublicKey) {
+    this.onlyPublisher();
+    this.publisher.getAndRequireEquals();
+    this.publisher.set(publisher);
   }
 
   /**
