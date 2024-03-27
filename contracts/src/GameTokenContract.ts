@@ -53,7 +53,7 @@ export class GameToken extends TokenContract {
     });
   }
 
-  @method async init() {
+  init() {
     this.account.provedState.getAndRequireEquals().assertFalse();
 
     super.init();
@@ -67,15 +67,16 @@ export class GameToken extends TokenContract {
     const price = this.gamePrice.getAndRequireEquals();
     const discount = this.discount.getAndRequireEquals();
     const publisherAddress = this.publisher.getAndRequireEquals();
+    Provable.log(publisherAddress);
     const totalPrice = price.sub(discount);
 
     this.account.balance.requireBetween(UInt64.zero, UInt64.MAXINT());
 
-    const userAccount = Account(this.sender, this.deriveTokenId());
+    const userAccount = Account(to, this.deriveTokenId());
     userAccount.balance.requireEquals(UInt64.zero);
 
-    const accountUpdate = AccountUpdate.createSigned(this.sender);
-    accountUpdate.send({ to: publisherAddress, amount: totalPrice });
+    const accountUpdate = AccountUpdate.createSigned(to);
+    accountUpdate.send({ to: publisherAddress, amount: 13212312 });
 
     this.internal.mint({
       address: to,
