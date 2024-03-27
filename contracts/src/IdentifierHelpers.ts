@@ -1,4 +1,4 @@
-import { Field } from 'o1js';
+import { Bool, CircuitString, Field } from 'o1js';
 
 export class UUID {
   constructor(public uuid: string) {
@@ -49,6 +49,41 @@ export class CPUID {
 
 export class Serial {
   constructor(public serial: string) {
-    this.serial = serial.slice(0, 31).toUpperCase();
+    serial = serial.toUpperCase();
+  }
+
+  toCircuitString(): CircuitString {
+    return CircuitString.fromString(this.serial);
+  }
+  static assertEqual(a: Serial, b: Serial) {
+    const aStr = a.toCircuitString();
+    const bStr = b.toCircuitString();
+    return aStr.assertEquals(bStr);
+  }
+}
+
+export class MacAddress {
+  constructor(public macAddress: string) {
+    if (!this.isValid()) {
+      throw new Error('Invalid MAC Address');
+    }
+    this.macAddress = this.macAddress
+      .replace(/:/g, '')
+      .replace(/-/g, '')
+      .toUpperCase();
+  }
+
+  isValid(): boolean {
+    const macAddressRegex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
+    return macAddressRegex.test(this.macAddress);
+  }
+
+  public toBigNumber(): string {
+    return BigInt('0x' + this.macAddress).toString(10);
+  }
+
+  public toField(): Field {
+    const bigint = this.toBigNumber();
+    return Field(bigint);
   }
 }
