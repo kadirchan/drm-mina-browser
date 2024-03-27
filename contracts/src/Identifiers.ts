@@ -1,46 +1,41 @@
-import { Field, Struct } from 'o1js';
-
-export type IdentifierType =
-  | 'cpuId'
-  | 'systemSerial'
-  | 'systemUUID'
-  | 'baseboardSerial'
-  | 'macAddress'
-  | 'diskSerial';
+import { CircuitString, Field, Struct } from 'o1js';
+import { CPUID, MacAddress, Serial, UUID } from './IdentifierHelpers.js';
 
 export interface RawIdentifiers {
   cpuId: string;
   systemSerial: string;
   systemUUID: string;
   baseboardSerial: string;
-  macAddress: string;
+  macAddress: [string];
   diskSerial: string;
 }
 
-export interface CleanIdentifiers {
-  cpuId: number;
-  systemSerial: number;
-  systemUUID: number;
-  baseboardSerial: number;
-  macAddress: number;
-  diskSerial: number;
+export class MacAddressField extends Struct({
+  ethernet: Field,
+  wifi: Field,
+}) {
+  constructor(macAddress: { ethernet: Field; wifi: Field }) {
+    macAddress.ethernet.assertNotEquals(Field(0));
+    macAddress.wifi.assertNotEquals(Field(0));
+    super(macAddress);
+  }
 }
 
 export class Identifiers extends Struct({
   cpuId: Field,
-  systemSerial: Field,
+  systemSerial: CircuitString,
   systemUUID: Field,
-  baseboardSerial: Field,
-  macAddress: Field,
-  diskSerial: Field,
+  baseboardSerial: CircuitString,
+  macAddress: MacAddressField,
+  diskSerial: CircuitString,
 }) {
   constructor(
-    cpuId: Field,
-    systemSerial: Field,
-    systemUUID: Field,
-    baseboardSerial: Field,
-    macAddress: Field,
-    diskSerial: Field
+    public cpuId: Field,
+    public systemSerial: CircuitString,
+    public systemUUID: Field,
+    public baseboardSerial: CircuitString,
+    public macAddress: MacAddressField,
+    public diskSerial: CircuitString
   ) {
     super({
       cpuId,
@@ -50,52 +45,39 @@ export class Identifiers extends Struct({
       macAddress,
       diskSerial,
     });
-    this.cpuId = cpuId;
-    this.systemSerial = systemSerial;
-    this.systemUUID = systemUUID;
-    this.baseboardSerial = baseboardSerial;
-    this.macAddress = macAddress;
-    this.diskSerial = diskSerial;
   }
+
+  static fromRaw(raw: RawIdentifiers): Identifiers {
+    const cpuId = CPUID.fromStringToField(raw.cpuId);
+    const systemSerial = Serial.fromStringToCircuitString(raw.systemSerial);
+    const systemUUID = UUID.fromStringToField(raw.systemUUID);
+    const baseboardSerial = Serial.fromStringToCircuitString(
+      raw.baseboardSerial
+    );
+    const macAddress = MacAddress.fromStringArrayToMacAddressField(
+      raw.macAddress
+    );
+    const diskSerial = Serial.fromStringToCircuitString(raw.diskSerial);
+
+    return new Identifiers(
+      cpuId,
+      systemSerial,
+      systemUUID,
+      baseboardSerial,
+      macAddress,
+      diskSerial
+    );
+  }
+
   toFields() {
     return [
       this.cpuId,
-      this.systemSerial,
+      this.systemSerial.hash(),
       this.systemUUID,
-      this.baseboardSerial,
-      this.macAddress,
-      this.diskSerial,
+      this.baseboardSerial.hash(),
+      this.macAddress.ethernet,
+      this.macAddress.wifi,
+      this.diskSerial.hash(),
     ];
   }
-  fromCleanIdentifiers(cleanIdentifiers: CleanIdentifiers) {
-    return new Identifiers(
-      Field(cleanIdentifiers.cpuId),
-      Field(cleanIdentifiers.systemSerial),
-      Field(cleanIdentifiers.systemUUID),
-      Field(cleanIdentifiers.baseboardSerial),
-      Field(cleanIdentifiers.macAddress),
-      Field(cleanIdentifiers.diskSerial)
-    );
-  }
-}
-
-export function cleanUpRawIdentifiers(
-  rawIdentifiers: RawIdentifiers
-): CleanIdentifiers {
-  //TODO: Implement this function
-  return {
-    cpuId: 101010,
-    systemSerial: 101010,
-    systemUUID: 101010,
-    baseboardSerial: 101010,
-    macAddress: 101010,
-    diskSerial: 101010,
-  };
-}
-
-export function validateRawIdentifiers(
-  rawIdentifiers: RawIdentifiers
-): boolean {
-  // TODO: Implement this function
-  return true;
 }
