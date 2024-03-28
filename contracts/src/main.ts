@@ -1,12 +1,17 @@
 import {
   AccountUpdate,
+  MerkleMap,
   Mina,
+  Poseidon,
   PrivateKey,
   PublicKey,
   TokenId,
   UInt64,
 } from 'o1js';
-import { GameToken } from './GameTokenWrapped.js';
+import { GameToken } from './GameTokenContract.js';
+import { mockIdentifiers } from './mock.js';
+import { Identifiers, RawIdentifiers } from './Identifiers.js';
+import { DeviceMapTransition, MapUpdate } from './DRMproof.js';
 
 const proofsEnabled = false;
 (async () => {
@@ -48,8 +53,11 @@ const proofsEnabled = false;
       getBalance(deployer.publicKey, GameTokenAddr)
     );
 
-    console.log('alice MINA:', getBalance(alice.publicKey));
-    console.log('alice GameToken:', getBalance(alice.publicKey, GameTokenAddr));
+    console.log('\talice MINA:', getBalance(alice.publicKey));
+    console.log(
+      '\talice GameToken:',
+      getBalance(alice.publicKey, GameTokenAddr)
+    );
 
     console.log('\tbob MINA:', getBalance(bob.publicKey));
     console.log('\tbob GameToken:', getBalance(bob.publicKey, GameTokenAddr));
@@ -74,7 +82,7 @@ const proofsEnabled = false;
   });
 
   await deployTxn.prove();
-  await deployTxn.sign([deployer.privateKey, GameTokenKey]).send();
+  await deployTxn.sign([deployer.privateKey]).send();
 
   console.log('Deployed');
 
@@ -90,4 +98,40 @@ const proofsEnabled = false;
   await mintTxn.sign([alice.privateKey]).send();
 
   printState();
+
+  // ----------------------------------------------------------------------------
+
+  const AliceDeviceRaw = mockIdentifiers[0];
+  const AliceDeviceIdentifiers = Identifiers.fromRaw(AliceDeviceRaw);
+  const AliceDeviceHash = AliceDeviceIdentifiers.hash();
+
+  const BobDeviceRaw = mockIdentifiers[1];
+  const BobDeviceIdentifiers = Identifiers.fromRaw(BobDeviceRaw);
+  const BobDeviceHash = BobDeviceIdentifiers.hash();
+
+  const Tree = new MerkleMap();
+  let previousRoot = Tree.getRoot();
+  let previousValue = Tree.get(Poseidon.hash(alice.publicKey.toFields()));
+
+  Tree.set(Poseidon.hash(alice.publicKey.toFields()), AliceDeviceHash);
+  let newRoot = Tree.getRoot();
+  let newValue = Tree.get(Poseidon.hash(alice.publicKey.toFields()));
+
+  let AliceWitness = Tree.getWitness(Poseidon.hash(alice.publicKey.toFields()));
+
+  const AliceMapUpdate = MapUpdate.fromFields([
+    previousRoot,
+    newRoot,
+    Poseidon.hash(alice.publicKey.toFields()),
+    previousValue,
+    newValue,
+    ...AliceWitness.toFields(),
+  ]);
+
+  const AliceTransition = DeviceMapTransition.create(
+    alice.publicKey,
+    AliceMapUpdate
+  );
+
+  console.log('Alice Transition created');
 })();
