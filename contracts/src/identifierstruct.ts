@@ -1,35 +1,27 @@
-import { Bool, CircuitString, Field } from 'o1js';
-import { MacAddressField } from './Identifiers.js';
+import { CircuitString, Field, Struct } from 'o1js';
 
-export class UUID {
-  constructor(public uuid: string) {
-    if (!this.isValid()) {
+export class UUID extends Struct({
+  uuid: Field,
+}) {
+  fromString(uuid: string) {
+    if (!this.isValid(uuid)) {
       throw new Error('Invalid UUID');
     }
-    this.uuid = uuid.replace(/-/g, '').toUpperCase();
+
+    return new UUID({
+      uuid: this.toField(uuid),
+    });
   }
 
-  isValid(): boolean {
+  isValid(uuid: string): boolean {
     const uuidRegex =
       /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-    return uuidRegex.test(this.uuid);
+    return uuidRegex.test(uuid);
   }
 
-  toBigNumber(): string {
-    return BigInt('0x' + this.uuid).toString(10);
-  }
-
-  public toField(): Field {
-    const bigint = this.toBigNumber();
-    return Field(bigint);
-  }
-
-  public static fromStringToField(uuid: string): Field {
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-    if (!uuidRegex.test(uuid)) throw new Error('Invalid UUID');
+  toField(uuid: string): Field {
     uuid = uuid.replace(/-/g, '').toUpperCase();
-    const bigint = BigInt('0x' + uuid).toString(10);
+    const bigint = BigInt('0x' + this.uuid).toString(10);
     return Field(bigint);
   }
 }
@@ -55,14 +47,6 @@ export class CPUID {
     const bigint = this.toBigNumber();
     return Field(bigint);
   }
-
-  public static fromStringToField(cpuid: string): Field {
-    const cpuidRegex = /^[0-9A-F]{16}$/;
-    if (!cpuidRegex.test(cpuid)) throw new Error('Invalid CPUID');
-    cpuid = cpuid.toUpperCase();
-    const bigint = BigInt('0x' + cpuid).toString(10);
-    return Field(bigint);
-  }
 }
 
 export class Serial {
@@ -77,11 +61,6 @@ export class Serial {
     const aStr = a.toCircuitString();
     const bStr = b.toCircuitString();
     return aStr.assertEquals(bStr);
-  }
-
-  public static fromStringToCircuitString(serial: string): CircuitString {
-    serial = serial.toUpperCase();
-    return CircuitString.fromString(serial);
   }
 }
 
@@ -108,15 +87,5 @@ export class MacAddress {
   public toField(): Field {
     const bigint = this.toBigNumber();
     return Field(bigint);
-  }
-
-  static fromStringArrayToMacAddressField(
-    macAddress: string[]
-  ): MacAddressField {
-    const [ethernet, wifi] = macAddress.map((mac) => {
-      const macAddress = new MacAddress(mac);
-      return macAddress.toField();
-    });
-    return new MacAddressField({ ethernet, wifi });
   }
 }

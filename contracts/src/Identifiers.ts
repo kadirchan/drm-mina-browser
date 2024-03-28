@@ -1,4 +1,4 @@
-import { CircuitString, Field, Struct } from 'o1js';
+import { CircuitString, Field, Poseidon, Struct } from 'o1js';
 import { CPUID, MacAddress, Serial, UUID } from './IdentifierHelpers.js';
 
 export interface RawIdentifiers {
@@ -6,7 +6,7 @@ export interface RawIdentifiers {
   systemSerial: string;
   systemUUID: string;
   baseboardSerial: string;
-  macAddress: [string];
+  macAddress: string[];
   diskSerial: string;
 }
 
@@ -79,5 +79,9 @@ export class Identifiers extends Struct({
       this.macAddress.wifi,
       this.diskSerial.hash(),
     ];
+  }
+
+  hash() {
+    return Poseidon.hash(this.toFields());
   }
 }
