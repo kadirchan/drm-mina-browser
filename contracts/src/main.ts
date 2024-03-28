@@ -5,13 +5,14 @@ import {
   Poseidon,
   PrivateKey,
   PublicKey,
+  Signature,
   TokenId,
   UInt64,
 } from 'o1js';
 import { GameToken } from './GameTokenContract.js';
 import { mockIdentifiers } from './mock.js';
 import { Identifiers, RawIdentifiers } from './Identifiers.js';
-import { DeviceMapTransition, MapUpdate } from './DRMproof.js';
+import { DRM, DeviceMapTransition, MapUpdate } from './DRMproof.js';
 
 const proofsEnabled = false;
 (async () => {
@@ -27,8 +28,15 @@ const proofsEnabled = false;
 
   const GameTokenInstance = new GameToken(GameTokenAddr);
 
+  const drmContractKey = PrivateKey.random();
+  const drmContractAddr = drmContractKey.toPublicKey();
+  const drmContractInstance = new DRM(drmContractAddr);
+
+  const Tree = new MerkleMap();
+
   if (proofsEnabled) {
     await GameToken.compile();
+    await DRM.compile();
   }
 
   const printState = () => {
@@ -76,18 +84,39 @@ const proofsEnabled = false;
 
   // ----------------------------------------------------------------------------
 
-  const deployTxn = await Mina.transaction(deployer.publicKey, () => {
+  const tokenDeployTxn = await Mina.transaction(deployer.publicKey, () => {
     AccountUpdate.fundNewAccount(deployer.publicKey);
     GameTokenInstance.deploy({ zkappKey: GameTokenKey });
   });
 
-  await deployTxn.prove();
-  await deployTxn.sign([deployer.privateKey]).send();
+  await tokenDeployTxn.prove();
+  await tokenDeployTxn.sign([deployer.privateKey]).send();
 
-  console.log('Deployed');
+  console.log('Token Deployed');
+
+  const drmDeployTxn = await Mina.transaction(deployer.publicKey, () => {
+    AccountUpdate.fundNewAccount(deployer.publicKey);
+    drmContractInstance.deploy({ zkappKey: drmContractKey });
+    // drmContractInstance.setGameTokenAddress(GameTokenAddr);
+    // drmContractInstance.setDeviceRoot(Tree.getRoot());
+  });
+
+  await drmDeployTxn.prove();
+  await drmDeployTxn.sign([deployer.privateKey]).send();
+
+  console.log('DRM Deployed');
+
+  const setDrmTxn = await Mina.transaction(deployer.publicKey, () => {
+    drmContractInstance.setGameTokenAddress(GameTokenAddr);
+    drmContractInstance.setDeviceRoot(Tree.getRoot());
+  });
+
+  await setDrmTxn.prove();
+  await setDrmTxn.sign([deployer.privateKey]).send();
+
+  console.log('DRM Set');
 
   printState();
-
   // ----------------------------------------------------------------------------
 
   const mintTxn = await Mina.transaction(alice.publicKey, () => {
@@ -99,17 +128,21 @@ const proofsEnabled = false;
 
   printState();
 
+  const balanceTxn = await Mina.transaction(alice.publicKey, () => {
+    const balance = GameTokenInstance.getBalance(alice.publicKey);
+    console.log('Alice balance:', balance);
+  });
   // ----------------------------------------------------------------------------
 
   const AliceDeviceRaw = mockIdentifiers[0];
   const AliceDeviceIdentifiers = Identifiers.fromRaw(AliceDeviceRaw);
   const AliceDeviceHash = AliceDeviceIdentifiers.hash();
+  const AliceSignature = Signature.create(alice.privateKey, [AliceDeviceHash]);
 
   const BobDeviceRaw = mockIdentifiers[1];
   const BobDeviceIdentifiers = Identifiers.fromRaw(BobDeviceRaw);
   const BobDeviceHash = BobDeviceIdentifiers.hash();
 
-  const Tree = new MerkleMap();
   let previousRoot = Tree.getRoot();
   let previousValue = Tree.get(Poseidon.hash(alice.publicKey.toFields()));
 
@@ -119,19 +152,23 @@ const proofsEnabled = false;
 
   let AliceWitness = Tree.getWitness(Poseidon.hash(alice.publicKey.toFields()));
 
-  const AliceMapUpdate = MapUpdate.fromFields([
-    previousRoot,
-    newRoot,
-    Poseidon.hash(alice.publicKey.toFields()),
-    previousValue,
-    newValue,
-    ...AliceWitness.toFields(),
-  ]);
+  const rootBeforeCall = drmContractInstance.getRoot();
+  console.log('Root before call: ', rootBeforeCall.toString());
 
-  const AliceTransition = DeviceMapTransition.create(
-    alice.publicKey,
-    AliceMapUpdate
-  );
+  const updateTxn = await Mina.transaction(alice.publicKey, () => {
+    // AccountUpdate.fundNewAccount(alice.publicKey);
+    drmContractInstance.addDevice(
+      alice.publicKey,
+      previousValue,
+      AliceDeviceIdentifiers,
+      AliceWitness,
+      AliceSignature
+    );
+  });
 
-  console.log('Alice Transition created');
+  await updateTxn.prove();
+  await updateTxn.sign([alice.privateKey]).send();
+
+  const rootAfterCall = drmContractInstance.getRoot();
+  console.log('Root after call: ', rootAfterCall.toString());
 })();

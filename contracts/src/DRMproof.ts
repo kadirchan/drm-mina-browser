@@ -1,16 +1,15 @@
 import {
   Account,
-  CircuitString,
   Field,
   MerkleMapWitness,
   Poseidon,
   PrivateKey,
   PublicKey,
-  SelfProof,
   Signature,
   SmartContract,
   State,
   Struct,
+  TokenId,
   UInt64,
   ZkProgram,
   method,
@@ -19,34 +18,57 @@ import {
 import { GameToken } from './GameTokenContract.js';
 import { Identifiers } from './Identifiers.js';
 
-const gameTokenAddress = PrivateKey.random().toPublicKey();
-
 export class DRM extends SmartContract {
   @state(Field) deviceRoot = State<Field>();
-  @state(PublicKey) gameTokenAddress = State<PublicKey>;
+  @state(PublicKey) gameTokenAddress = State<PublicKey>();
 
   @method addDevice(
     userAddress: PublicKey,
+    previousValue: Field,
     identifiers: Identifiers,
     witness: MerkleMapWitness,
     signature: Signature
   ) {
-    const gameTokenId = new GameToken(gameTokenAddress).deriveTokenId();
-    const account = Account(userAddress, gameTokenId);
-    const tokenBalance = account.balance.getAndRequireEquals();
-    tokenBalance.assertGreaterThan(UInt64.zero);
+    const gameTokenId = TokenId.derive(
+      this.gameTokenAddress.getAndRequireEquals()
+    );
+
+    // TODO cannot check balance fix that
+
+    // const account = Account(userAddress, gameTokenId);
+    // const tokenBalance = account.balance.getAndRequireEquals();
+    // tokenBalance.assertGreaterThan(UInt64.zero);
 
     // Todo add more checks for identifiers
 
-    const currentRoot = this.deviceRoot.getAndRequireEquals();
-    const [newRoot, key] = witness.computeRootAndKey(
-      Poseidon.hash(userAddress.toFields())
-    );
+    const [previousRoot, previousKey] =
+      witness.computeRootAndKey(previousValue);
+
+    this.deviceRoot.getAndRequireEquals().assertEquals(previousRoot);
+    previousKey.assertEquals(Poseidon.hash(userAddress.toFields()));
 
     const identifiersHash = identifiers.hash();
-    key.assertEquals(identifiersHash);
+    const [newRoot, newKey] = witness.computeRootAndKey(identifiersHash);
+    newKey.assertEquals(previousKey);
 
     signature.verify(userAddress, [identifiersHash]).assertTrue();
+
+    this.deviceRoot.set(newRoot);
+  }
+
+  @method setGameTokenAddress(address: PublicKey) {
+    this.gameTokenAddress.getAndRequireEquals();
+    this.gameTokenAddress.set(address);
+  }
+
+  @method getRoot() {
+    return this.deviceRoot.getAndRequireEquals();
+  }
+
+  // TODO: Remove after testing
+  @method setDeviceRoot(root: Field) {
+    this.deviceRoot.getAndRequireEquals();
+    this.deviceRoot.set(root);
   }
 }
 
