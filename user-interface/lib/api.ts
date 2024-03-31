@@ -2,8 +2,6 @@ const ENDPOINT = "http://localhost:8080/";
 
 export async function fetchGameData() {
     const headers = { "Content-Type": "application/json" };
-    console.log(ENDPOINT + "game-data");
-
     const res = await fetch(ENDPOINT + "game-data", { headers, method: "GET" });
     const json = await res.json();
     if (json.errors) {

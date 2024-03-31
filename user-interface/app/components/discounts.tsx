@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import {
     Carousel,
     CarouselContent,
@@ -13,11 +13,33 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Bookmark } from "lucide-react";
-import { toggleGameWishlist } from "@/lib/api";
+import { fetchGameData, fetchWishlist, toggleGameWishlist } from "@/lib/api";
 import WalletAccount from "@/lib/walletData";
+import { useRouter } from "next/navigation";
+import { shuffleArray } from "@/lib/helpers";
+
+const ENDPOINT = "http://localhost:8080/";
 
 export default function Discounts() {
     const { toast } = useToast();
+    const [data, setData] = useState(new Array<Game>());
+    const [wishlist, setWishlist] = useState(new Array<Game>());
+
+    const router = useRouter();
+
+    const updateWishlist = () => {
+        fetchWishlist(WalletAccount.getWalletData().address || "123123").then((data) =>
+            setWishlist(shuffleArray(data))
+        );
+    };
+
+    useMemo(() => {
+        fetchGameData().then((data) => {
+            data = data.filter((game: Game) => game.discount > 0);
+            setData(data);
+        });
+        updateWishlist();
+    }, []);
 
     return (
         <div className="row-span-1 col-span-3 lg:col-span-5 flex justify-center">
@@ -34,29 +56,41 @@ export default function Discounts() {
             >
                 <h3 className="mb-2 mt-2 text-lg font-medium tracking-tight">On Discount</h3>
                 <CarouselContent>
-                    {Array.from({ length: 9 }).map((_, index) => (
+                    {Array.from(data).map((game, index) => (
                         <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/3">
                             <div className="p-2">
                                 <Card>
                                     <CardContent className="relative flex items-center justify-center p-6 lg:aspect-3/4 md:aspect-square">
-                                        Image
+                                        <img
+                                            src={ENDPOINT + game.cover}
+                                            alt={game.name}
+                                            className="w-full h-full object-cover"
+                                        />
                                         <Badge className="absolute top-2 left-2 text-sm font-normal bg-green-500 hover:bg-green-400">
-                                            -60%
+                                            {"- " +
+                                                Math.floor((game.discount / game.price) * 100) +
+                                                "%"}
                                         </Badge>
                                         <Bookmark
                                             className=" absolute top-2 right-2 w-6 h-6 cursor-pointer "
                                             onClick={() => {
-                                                toggleGameWishlist(
-                                                    WalletAccount.getWalletData().address ||
-                                                        "123123",
-                                                    index
-                                                );
-                                                toast({ description: "Added to wishlist" });
+                                                if (WalletAccount.getWalletData().address) {
+                                                    toggleGameWishlist(
+                                                        // @ts-ignore
+                                                        WalletAccount.getWalletData().address,
+                                                        index
+                                                    );
+                                                    toast({ description: "Added to wishlist" });
+                                                } else {
+                                                    toast({
+                                                        description: "Please connect your wallet",
+                                                    });
+                                                }
                                             }}
                                         ></Bookmark>
                                     </CardContent>
                                     <CardFooter className="w-full flex justify-between">
-                                        <CardDescription>Description</CardDescription>
+                                        <CardDescription>{game.name}</CardDescription>
                                         <Button
                                             onClick={() => {
                                                 toast({
@@ -64,7 +98,7 @@ export default function Discounts() {
                                                 });
                                             }}
                                         >
-                                            {"Buy For: " + " $"}
+                                            {game.price - game.discount + " Mina"}
                                         </Button>
                                     </CardFooter>
                                 </Card>

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { fetchGameData, fetchWishlist } from "@/lib/api";
 import WalletAccount from "@/lib/walletData";
 import { useRouter } from "next/navigation";
+import { shuffleArray } from "@/lib/helpers";
 
 const ENDPOINT = "http://localhost:8080/";
 
@@ -23,11 +24,15 @@ export default function Featured() {
 
     const router = useRouter();
 
-    useMemo(() => {
-        fetchGameData().then((data) => setData(data));
+    const updateWishlist = () => {
         fetchWishlist(WalletAccount.getWalletData().address || "123123").then((data) =>
             setWishlist(data)
         );
+    };
+
+    useMemo(() => {
+        fetchGameData().then((data) => setData(data));
+        updateWishlist();
     }, []);
     return (
         <div className="row-span-1 col-span-3 lg:col-span-5 flex justify-center py-8">
@@ -44,7 +49,7 @@ export default function Featured() {
             >
                 <h3 className="mb-2 text-lg font-medium tracking-tight">Featured Games</h3>
                 <CarouselContent>
-                    {Array.from(data).map((game, index) => (
+                    {shuffleArray(Array.from(data)).map((game, index) => (
                         <CarouselItem key={index} className="md:basis-full lg:basis-full">
                             <div className="p-2">
                                 <Card
@@ -73,7 +78,7 @@ export default function Featured() {
                                                 });
                                             }}
                                         >
-                                            {"Buy For: " + " $"}
+                                            {"Buy For: " + (game.price - game.discount) + " Mina"}
                                         </Button>
                                     </CardFooter>
                                 </Card>
