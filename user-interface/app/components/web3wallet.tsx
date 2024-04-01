@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
+import { fetchWishlist } from "@/lib/api";
 import { useUserStore } from "@/lib/stores/userWallet";
 import { Wallet } from "lucide-react";
 import React, { useState } from "react";
@@ -23,6 +24,10 @@ export default function Web3wallet() {
             userWallet.setUserPublicKey(addresses[0]);
             userWallet.setConnected(true);
             userWallet.setConnecting(false);
+            // const balance = await Mina.getBalance(addresses[0]);
+            // setUserMinaBalance(balance);
+            const wishlist = await fetchWishlist(addresses[0]);
+            userWallet.setWishlist(wishlist);
         }
     };
 

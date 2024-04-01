@@ -78,6 +78,7 @@ export default function Discounts() {
                                                         userStore.userPublicKey,
                                                         index
                                                     );
+                                                    userStore.setFlag();
                                                     console.log(status);
                                                     if (!status) {
                                                         toast({

@@ -1,6 +1,6 @@
 declare global {
     interface Game {
-        id: number;
+        gameId: number;
         name: string;
         description: string;
         creator: string;

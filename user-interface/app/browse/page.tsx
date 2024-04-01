@@ -26,7 +26,7 @@ export default function Browse() {
         <div className="grid grid-cols-4 gap-4 p-8">
             {games.map((game) => (
                 <Card
-                    key={game.id}
+                    key={game.gameId}
                     className=" aspect-square w-[300px] cursor-pointer mb-16"
                     onClick={() => router.push("/game-detail?" + game.name)}
                 >

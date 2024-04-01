@@ -6,6 +6,7 @@ interface UserState {
     userPublicKey?: string;
     userMinaBalance: number;
     wishlist: number[];
+    wishlistFlag: boolean;
     library: number[];
 
     setConnected: (connected: boolean) => void;
@@ -13,6 +14,8 @@ interface UserState {
     setUserPublicKey: (publicKey: string) => void;
     setUserMinaBalance: (balance: number) => void;
     setWishlist: (wishlist: number[]) => void;
+    setFlag: () => void;
+    nullifyFlag: () => void;
     setLibrary: (library: number[]) => void;
     disconnect: () => void;
 }
@@ -23,6 +26,7 @@ export const useUserStore = create<UserState>()((set) => ({
     userPublicKey: "",
     userMinaBalance: 0,
     wishlist: [],
+    wishlistFlag: false,
     library: [],
 
     setConnected: (connected) => set({ isConnected: connected }),
@@ -30,6 +34,8 @@ export const useUserStore = create<UserState>()((set) => ({
     setUserPublicKey: (publicKey) => set({ userPublicKey: publicKey }),
     setUserMinaBalance: (balance) => set({ userMinaBalance: balance }),
     setWishlist: (wishlist) => set({ wishlist }),
+    setFlag: () => set({ wishlistFlag: true }),
+    nullifyFlag: () => set({ wishlistFlag: false }),
     setLibrary: (library) => set({ library }),
     disconnect: () =>
         set({

@@ -4,6 +4,8 @@ import "./wishlist.css";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/stores/userWallet";
 import { useGamesStore } from "@/lib/stores/gameStore";
+import { useMemo } from "react";
+import { fetchWishlist } from "@/lib/api";
 
 const ENDPOINT = "http://localhost:8080/";
 
@@ -14,10 +16,19 @@ export default function WishlistItems() {
 
     const userStore = useUserStore();
 
+    useMemo(() => {
+        if (userStore.isConnected) {
+            fetchWishlist(userStore.userPublicKey || "").then((data) => {
+                userStore.setWishlist(data);
+            });
+        }
+        userStore.nullifyFlag();
+    }, [userStore.wishlistFlag]);
+
     return userStore.isConnected ? (
         <div className=" flex w-full flex-wrap gap-4 justify-center">
             {gameStore.games
-                .filter((game: Game) => userStore.wishlist.includes(game.id))
+                .filter((game: Game) => userStore.wishlist.includes(game.gameId))
                 .map((game, index) => {
                     return (
                         <Card
