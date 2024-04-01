@@ -127,7 +127,7 @@ export class GameToken extends TokenContract {
     const publisher = this.publisher.getAndRequireEquals();
     AccountUpdate.create(publisher).requireSignature();
   }
-  @method async approveBase(forest: AccountUpdateForest) {
+  @method approveBase(forest: AccountUpdateForest) {
     this.checkZeroBalanceChange(forest);
   }
 }

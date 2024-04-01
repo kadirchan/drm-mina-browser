@@ -1,9 +1,11 @@
 import {
   Account,
+  AccountUpdate,
   Field,
   MerkleMapWitness,
   Poseidon,
   PrivateKey,
+  Provable,
   PublicKey,
   Signature,
   SmartContract,
@@ -33,11 +35,14 @@ export class DRM extends SmartContract {
       this.gameTokenAddress.getAndRequireEquals()
     );
 
-    // TODO cannot check balance fix that
+    const accountUpdate = AccountUpdate.create(userAddress, gameTokenId);
+    const tokenContract = new GameToken(
+      this.gameTokenAddress.getAndRequireEquals()
+    );
+    const tokenBalance = accountUpdate.account.balance.getAndRequireEquals();
+    tokenContract.approveAccountUpdate(accountUpdate);
 
-    // const account = Account(userAddress, gameTokenId);
-    // const tokenBalance = account.balance.getAndRequireEquals();
-    // tokenBalance.assertGreaterThan(UInt64.zero);
+    tokenBalance.assertGreaterThan(UInt64.zero);
 
     // Todo add more checks for identifiers
 
@@ -156,3 +161,24 @@ const DeviceUpdate = ZkProgram({
 });
 
 export class DRMUpdateProof extends ZkProgram.Proof(DeviceUpdate) {}
+
+export class SessionOutput extends Struct({
+  hash: Field,
+  timeStamp: Field,
+}) {}
+
+const CreateSessionProof = ZkProgram({
+  name: 'CreateSessionProof',
+  publicInput: Field,
+  publicOutputs: Field,
+  methods: {
+    validateDevice: {
+      privateInputs: [Identifiers],
+      method(commitment: Field, identifiers: Identifiers) {
+        commitment.assertEquals(Poseidon.hash(identifiers.toFields()));
+
+        return commitment;
+      },
+    },
+  },
+});

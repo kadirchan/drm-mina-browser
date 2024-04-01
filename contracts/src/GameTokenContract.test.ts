@@ -82,8 +82,6 @@ describe('GameToken', () => {
     const deployerPreviousBalance = Mina.getBalance(
       deployer.publicKey
     ).toBigInt();
-    // const bobPreviousBalance = Mina.getBalance(bob.publicKey).toBigInt();
-
     const mintTxn = await Mina.transaction(bob.publicKey, () => {
       AccountUpdate.fundNewAccount(bob.publicKey);
       GameTokenInstance.mintGameToken(bob.publicKey);
