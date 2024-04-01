@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
     Carousel,
     CarouselContent,
@@ -13,32 +13,26 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Bookmark } from "lucide-react";
-import { fetchGameData, fetchWishlist, toggleGameWishlist } from "@/lib/api";
-import WalletAccount from "@/lib/walletData";
+import { fetchGameData, toggleGameWishlist } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { shuffleArray } from "@/lib/helpers";
+// import { shuffleArray } from "@/lib/helpers";
+import { useGamesStore } from "@/lib/stores/gameStore";
+import { useUserStore } from "@/lib/stores/userWallet";
 
 const ENDPOINT = "http://localhost:8080/";
 
 export default function Discounts() {
     const { toast } = useToast();
-    const [data, setData] = useState(new Array<Game>());
-    const [wishlist, setWishlist] = useState(new Array<Game>());
+    const gameStore = useGamesStore();
+    const userStore = useUserStore();
 
     const router = useRouter();
-
-    const updateWishlist = () => {
-        fetchWishlist(WalletAccount.getWalletData().address || "123123").then((data) =>
-            setWishlist(shuffleArray(data))
-        );
-    };
 
     useMemo(() => {
         fetchGameData().then((data) => {
             data = data.filter((game: Game) => game.discount > 0);
-            setData(data);
+            gameStore.setDiscountGames(data);
         });
-        updateWishlist();
     }, []);
 
     return (
@@ -56,10 +50,13 @@ export default function Discounts() {
             >
                 <h3 className="mb-2 mt-2 text-lg font-medium tracking-tight">On Discount</h3>
                 <CarouselContent>
-                    {Array.from(data).map((game, index) => (
+                    {Array.from(gameStore.discountGames).map((game, index) => (
                         <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/3">
                             <div className="p-2">
-                                <Card>
+                                <Card
+                                    className=" overflow-hidden cursor-pointer"
+                                    onClick={() => router.push("/game-detail?game=" + game.name)}
+                                >
                                     <CardContent className="relative flex items-center justify-center p-6 lg:aspect-3/4 md:aspect-square">
                                         <img
                                             src={ENDPOINT + game.cover}
@@ -73,14 +70,24 @@ export default function Discounts() {
                                         </Badge>
                                         <Bookmark
                                             className=" absolute top-2 right-2 w-6 h-6 cursor-pointer "
-                                            onClick={() => {
-                                                if (WalletAccount.getWalletData().address) {
-                                                    toggleGameWishlist(
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                if (userStore.isConnected) {
+                                                    const status = await toggleGameWishlist(
                                                         // @ts-ignore
-                                                        WalletAccount.getWalletData().address,
+                                                        userStore.userPublicKey,
                                                         index
                                                     );
-                                                    toast({ description: "Added to wishlist" });
+                                                    console.log(status);
+                                                    if (!status) {
+                                                        toast({
+                                                            description: "Removed from wishlist",
+                                                        });
+                                                        // TODO fill none
+                                                    } else {
+                                                        toast({ description: "Added to wishlist" });
+                                                        // TODO fill white
+                                                    }
                                                 } else {
                                                     toast({
                                                         description: "Please connect your wallet",
@@ -89,7 +96,7 @@ export default function Discounts() {
                                             }}
                                         ></Bookmark>
                                     </CardContent>
-                                    <CardFooter className="w-full flex justify-between">
+                                    <CardFooter className="w-</CardContent>full flex justify-between">
                                         <CardDescription>{game.name}</CardDescription>
                                         <Button
                                             onClick={() => {

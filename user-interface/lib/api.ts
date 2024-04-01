@@ -11,18 +11,29 @@ export async function fetchGameData() {
     return json;
 }
 
-export async function toggleGameWishlist(userPubKey: string, gameId: number) {
+export async function toggleGameWishlist(userPubKey: string, gameId: number): Promise<boolean> {
     const headers = { "Content-Type": "application/json" };
+
+    console.log("wishlist", userPubKey, gameId);
 
     const res = await fetch(ENDPOINT + "wishlist/" + userPubKey, {
         headers,
         method: "POST",
         body: JSON.stringify({ gameId }),
     });
+
     const json = await res.json();
+    const status = res.status;
+
     if (json.errors) {
         console.error(json.errors);
         throw new Error("Failed to add wishlist API");
+    }
+
+    if (status == 201) {
+        return false;
+    } else {
+        return true;
     }
 }
 
