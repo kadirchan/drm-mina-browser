@@ -15,6 +15,7 @@ import { fetchGameData, fetchWishlist } from "@/lib/api";
 import { useRouter } from "next/navigation";
 // import { shuffleArray } from "@/lib/helpers";
 import { useGamesStore } from "@/lib/stores/gameStore";
+import GameBookmark from "./bookmark";
 
 const ENDPOINT = "http://localhost:8080/";
 
@@ -47,12 +48,14 @@ export default function Featured() {
                                     className=" overflow-hidden cursor-pointer"
                                     onClick={() => router.push("/game-detail?game=" + game.name)}
                                 >
-                                    <CardContent className="flex items-center justify-center p-6 lg:aspect-video md:aspect-square">
+                                    <CardContent className="flex items-center justify-center p-6 lg:aspect-video md:aspect-square relative">
                                         <img
                                             src={ENDPOINT + game.cover}
+                                            crossOrigin="anonymous"
                                             alt={game.name}
                                             className="w-full h-full object-cover"
                                         />
+                                        <GameBookmark className=" h-8 w-8" gameId={game.gameId} />
                                     </CardContent>
                                     <CardFooter className="w-full flex justify-between">
                                         <CardTitle>{game.name}</CardTitle>

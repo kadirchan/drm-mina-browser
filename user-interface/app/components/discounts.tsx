@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 // import { shuffleArray } from "@/lib/helpers";
 import { useGamesStore } from "@/lib/stores/gameStore";
 import { useUserStore } from "@/lib/stores/userWallet";
+import GameBookmark from "./bookmark";
 
 const ENDPOINT = "http://localhost:8080/";
 
@@ -60,45 +61,19 @@ export default function Discounts() {
                                     <CardContent className="relative flex items-center justify-center p-6 lg:aspect-3/4 md:aspect-square">
                                         <img
                                             src={ENDPOINT + game.cover}
+                                            crossOrigin="anonymous"
                                             alt={game.name}
                                             className="w-full h-full object-cover"
                                         />
-                                        <Badge className="absolute top-2 left-2 text-sm font-normal bg-green-500 hover:bg-green-400">
+                                        <Badge className="absolute top-2 left-2 text-sm font-normal bg-green-500 hover:bg-green-400 border-solid-black rounded-lg hover:font-medium">
                                             {"- " +
                                                 Math.floor((game.discount / game.price) * 100) +
                                                 "%"}
                                         </Badge>
-                                        <Bookmark
-                                            className=" absolute top-2 right-2 w-6 h-6 cursor-pointer "
-                                            onClick={async (e) => {
-                                                e.stopPropagation();
-                                                if (userStore.isConnected) {
-                                                    const status = await toggleGameWishlist(
-                                                        // @ts-ignore
-                                                        userStore.userPublicKey,
-                                                        index
-                                                    );
-                                                    userStore.setFlag();
-                                                    console.log(status);
-                                                    if (!status) {
-                                                        toast({
-                                                            description: "Removed from wishlist",
-                                                        });
-                                                        // TODO fill none
-                                                    } else {
-                                                        toast({ description: "Added to wishlist" });
-                                                        // TODO fill white
-                                                    }
-                                                } else {
-                                                    toast({
-                                                        description: "Please connect your wallet",
-                                                    });
-                                                }
-                                            }}
-                                        ></Bookmark>
+                                        <GameBookmark gameId={game.gameId} />
                                     </CardContent>
                                     <CardFooter className="w-</CardContent>full flex justify-between">
-                                        <CardDescription>{game.name}</CardDescription>
+                                        <CardDescription>{game.gameId}</CardDescription>
                                         <Button
                                             onClick={() => {
                                                 toast({

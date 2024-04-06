@@ -4,7 +4,7 @@ import "./wishlist.css";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/stores/userWallet";
 import { useGamesStore } from "@/lib/stores/gameStore";
-import { useMemo } from "react";
+import { useEffect } from "react";
 import { fetchWishlist } from "@/lib/api";
 
 const ENDPOINT = "http://localhost:8080/";
@@ -16,14 +16,13 @@ export default function WishlistItems() {
 
     const userStore = useUserStore();
 
-    useMemo(() => {
+    useEffect(() => {
         if (userStore.isConnected) {
             fetchWishlist(userStore.userPublicKey || "").then((data) => {
                 userStore.setWishlist(data);
             });
         }
-        userStore.nullifyFlag();
-    }, [userStore.wishlistFlag]);
+    }, []);
 
     return userStore.isConnected ? (
         <div className=" flex w-full flex-wrap gap-4 justify-center">
@@ -39,6 +38,7 @@ export default function WishlistItems() {
                             <CardContent className=" absolute p-4 flex justify-center items-center aspect-square w-[300px]">
                                 <img
                                     src={ENDPOINT + game.cover}
+                                    crossOrigin="anonymous"
                                     alt={game.name}
                                     className="w-full flex h-full object-cover rounded-lg"
                                 />
