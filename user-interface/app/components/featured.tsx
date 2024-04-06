@@ -10,18 +10,20 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { fetchGameData, fetchWishlist } from "@/lib/api";
 import { useRouter } from "next/navigation";
 // import { shuffleArray } from "@/lib/helpers";
 import { useGamesStore } from "@/lib/stores/gameStore";
 import GameBookmark from "./bookmark";
+import DiscountRate from "./discountRate";
+import { useToast } from "@/components/ui/use-toast";
 
 const ENDPOINT = "http://localhost:8080/";
 
 export default function Featured() {
     const gameStore = useGamesStore();
     const router = useRouter();
+    const { toast } = useToast();
 
     useMemo(() => {
         fetchGameData().then((data) => gameStore.setGames(data));
@@ -55,25 +57,41 @@ export default function Featured() {
                                             alt={game.name}
                                             className="w-full h-full object-cover"
                                         />
+                                        <DiscountRate variant={"bg"} game={game} />
                                         <GameBookmark className=" h-8 w-8" gameId={game.gameId} />
                                     </CardContent>
                                     <CardFooter className="w-full flex justify-between">
                                         <CardTitle>{game.name}</CardTitle>
-                                        <Button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                console.log("Game bought");
-                                                toast("Game bought", {
-                                                    description: "You have bought the game",
-                                                    action: {
-                                                        label: "Undo",
-                                                        onClick: () => console.log("Undo"),
-                                                    },
-                                                });
-                                            }}
-                                        >
-                                            {"Buy For: " + (game.price - game.discount) + " Mina"}
-                                        </Button>
+                                        <div className=" flex flex-row mt-8 p-2 gap-3">
+                                            <div className=" flex gap-1 justify-center items-center bg-gray-800 px-3 rounded-sm">
+                                                {game?.discount || 0 > 0 ? (
+                                                    <span className="text-base strikethrough text-gray-500 px-2">
+                                                        {game?.price}
+                                                    </span>
+                                                ) : (
+                                                    <></>
+                                                )}
+                                                <span className=" text-xl">
+                                                    {game?.price - game?.discount}
+                                                </span>
+                                                <img
+                                                    src={"/mina.png"}
+                                                    alt="mina"
+                                                    className=" w-5 h-5 inline-block"
+                                                />
+                                            </div>
+                                            <Button
+                                                variant={"default"}
+                                                onClick={(e) => {
+                                                    toast({
+                                                        description: "Soon",
+                                                    });
+                                                    e.stopPropagation();
+                                                }}
+                                            >
+                                                Buy Game
+                                            </Button>
+                                        </div>
                                     </CardFooter>
                                 </Card>
                             </div>

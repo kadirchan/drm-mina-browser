@@ -40,7 +40,7 @@ export default function WishlistItems() {
                                     src={ENDPOINT + game.cover}
                                     crossOrigin="anonymous"
                                     alt={game.name}
-                                    className="w-full flex h-full object-cover rounded-lg"
+                                    className="w-full flex h-full object-cover rounded-lg card-image"
                                 />
                             </CardContent>
                             <div className="flex flex-col gap-3 card-drawer bg-background h-full items-center p-3">

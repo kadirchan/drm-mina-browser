@@ -8,7 +8,7 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { Card, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useGamesStore } from "@/lib/stores/gameStore";
 import { useUserStore } from "@/lib/stores/userWallet";
 import GameBookmark from "./bookmark";
+import DiscountRate from "./discountRate";
 
 const ENDPOINT = "http://localhost:8080/";
 
@@ -65,20 +66,17 @@ export default function Discounts() {
                                             alt={game.name}
                                             className="w-full h-full object-cover"
                                         />
-                                        <Badge className="absolute top-2 left-2 text-sm font-normal bg-green-500 hover:bg-green-400 border-solid-black rounded-lg hover:font-medium">
-                                            {"- " +
-                                                Math.floor((game.discount / game.price) * 100) +
-                                                "%"}
-                                        </Badge>
+                                        <DiscountRate game={game} />
                                         <GameBookmark gameId={game.gameId} />
                                     </CardContent>
                                     <CardFooter className="w-</CardContent>full flex justify-between">
-                                        <CardDescription>{game.gameId}</CardDescription>
+                                        <CardTitle className=" text-base">{game.name}</CardTitle>
                                         <Button
-                                            onClick={() => {
+                                            onClick={(e) => {
                                                 toast({
-                                                    description: "You have bought the game",
+                                                    description: "Soon",
                                                 });
+                                                e.stopPropagation();
                                             }}
                                         >
                                             {game.price - game.discount + " Mina"}

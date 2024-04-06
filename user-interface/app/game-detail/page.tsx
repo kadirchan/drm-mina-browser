@@ -81,7 +81,7 @@ export default function GameDetail() {
                                                         100
                                                 )}
                                             </div>
-                                            <span className="text-base line-through text-gray-600 px-2">
+                                            <span className="text-base strikethrough text-gray-500 px-2">
                                                 {game?.price}
                                             </span>
                                         </>

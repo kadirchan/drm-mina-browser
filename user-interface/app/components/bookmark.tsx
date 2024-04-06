@@ -5,14 +5,20 @@ import { cn } from "@/lib/utils";
 import { Bookmark } from "lucide-react";
 import React from "react";
 
-export default function GameBookmark({ className, gameId }: { className: string; gameId: number }) {
+export default function GameBookmark({
+    className,
+    gameId,
+}: {
+    className?: string;
+    gameId: number;
+}) {
     const userStore = useUserStore();
     const { toast } = useToast();
     return (
         <Bookmark
             className={cn(
                 `absolute top-2 right-2 w-6 h-6 cursor-pointer ${
-                    userStore.wishlist.includes(gameId) ? " fill-slate-100" : "fill-card"
+                    userStore.wishlist.includes(gameId) ? " fill-current" : "fill-card"
                 }`,
                 className
             )}
