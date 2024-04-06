@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ModeToggle } from "@/components/mode-toggle";
-import { Wallet, Bookmark, Store, Gamepad2, Search, Shapes, Package2, Bell } from "lucide-react";
+import { Wallet, Bookmark, Store, Gamepad2, Shapes, Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Web3wallet from "./web3wallet";
 import Link from "next/link";
@@ -17,6 +17,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { wrap } from "comlink";
+import { WebWorker } from "@/lib/worker";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -24,10 +27,31 @@ export function Sidebar({ className }: SidebarProps) {
     const [currentPath, setCurrentPath] = useState<string>("/");
     const router = useRouter();
 
+    const { toast } = useToast();
+
     const handleNavigate = (path: string) => {
         setCurrentPath(path);
         router.push(path);
     };
+
+    useEffect(() => {
+        // console.log("Worker loading");
+        toast({
+            title: "Web workers loading",
+            description: "Web workers are loading in the background",
+        });
+        const worker = new Worker(new URL("../../lib/worker", import.meta.url));
+        const api = wrap<WebWorker>(worker);
+        worker.onmessage = (event) => {
+            if (event.data.type === "CONTRACTS_COMPILED") {
+                toast({
+                    title: "Web workers loaded",
+                    description: "Web workers have been loaded successfully",
+                });
+                window.worker = api;
+            }
+        };
+    }, []);
 
     return (
         <div className={cn("flex flex-col justify-between h-screen border-r", className)}>

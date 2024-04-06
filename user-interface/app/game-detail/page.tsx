@@ -45,8 +45,9 @@ export default function GameDetail() {
                                 <CarouselItem key={i}>
                                     <img
                                         src={ENDPOINT + game?.cover}
+                                        crossOrigin="anonymous"
                                         alt="Game"
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover aspect-video"
                                     />
                                 </CarouselItem>
                             ))}
@@ -61,8 +62,10 @@ export default function GameDetail() {
                         <div>Total Reviews: 5 (4.3)</div>
 
                         <div>
-                            {Array.from(game?.tags || []).map((tag, _) => (
-                                <Badge className=" rounded-lg mx-1">{tag}</Badge>
+                            {Array.from(game?.tags || []).map((tag, index) => (
+                                <Badge key={index} className=" rounded-lg mx-1">
+                                    {tag}
+                                </Badge>
                             ))}
                         </div>
 
@@ -79,13 +82,15 @@ export default function GameDetail() {
                                                 )}
                                             </div>
                                             <span className="text-base line-through text-gray-600 px-2">
-                                                {game?.discount + game?.price}
+                                                {game?.price}
                                             </span>
                                         </>
                                     ) : (
                                         <></>
                                     )}
-                                    <span className="text-base">{game?.price}</span>
+                                    <span className="text-base">
+                                        {game?.price - game?.discount}
+                                    </span>
                                     <img
                                         src={"/mina.png"}
                                         alt="mina"

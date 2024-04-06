@@ -1,3 +1,6 @@
+import { Remote } from "comlink";
+import { WebWorker } from "./worker";
+
 declare global {
     interface Game {
         gameId: number;
@@ -12,11 +15,8 @@ declare global {
         tags: string[];
     }
     interface Window {
-        /**
-         * The object Auro Wallet injects to allow websites to interact.
-         *
-         * Learn more: https://docs.aurowallet.com/general/
-         */
+        worker: undefined | Remote<WebWorker>;
+
         mina?: {
             /** Makes a request to connect wallet and returns an array of addresses. Throws if user rejects. */
             requestAccounts(): Promise<Array<string>>;

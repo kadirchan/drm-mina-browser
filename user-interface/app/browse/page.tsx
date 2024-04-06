@@ -33,6 +33,7 @@ export default function Browse() {
                     <CardContent className=" absolute p-4 flex justify-center items-center aspect-square w-[300px]">
                         <img
                             src={ENDPOINT + game.cover}
+                            crossOrigin="anonymous"
                             alt={game.name}
                             className="w-full flex h-full object-cover rounded-lg"
                         />
