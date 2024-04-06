@@ -71,16 +71,21 @@ export default function Discounts() {
                                     </CardContent>
                                     <CardFooter className="w-</CardContent>full flex justify-between">
                                         <CardTitle className=" text-base">{game.name}</CardTitle>
-                                        <Button
-                                            onClick={(e) => {
-                                                toast({
-                                                    description: "Soon",
-                                                });
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            {game.price - game.discount + " Mina"}
-                                        </Button>
+                                        <div className=" flex flex-col justify-center items-start bg-gray-800 px-3 rounded-sm">
+                                            <span className=" text-xs strikethrough text-gray-500">
+                                                &nbsp;{game?.price}&nbsp;
+                                            </span>
+                                            <div className="flex justify-center items-center gap-1">
+                                                <span className=" text-lg text-green-400">
+                                                    {game?.price - game?.discount}
+                                                </span>
+                                                <img
+                                                    src={"/mina.png"}
+                                                    alt="mina"
+                                                    className=" w-4 h-4 inline-block"
+                                                />
+                                            </div>
+                                        </div>
                                     </CardFooter>
                                 </Card>
                             </div>

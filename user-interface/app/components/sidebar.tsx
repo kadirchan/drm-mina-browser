@@ -20,12 +20,14 @@ import {
 import { wrap } from "comlink";
 import { WebWorker } from "@/lib/worker";
 import { useToast } from "@/components/ui/use-toast";
+import useHasMounted from "@/lib/customHooks";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
     const [currentPath, setCurrentPath] = useState<string>("/");
     const router = useRouter();
+    const hasMounted = useHasMounted();
 
     const { toast } = useToast();
 
@@ -35,23 +37,26 @@ export function Sidebar({ className }: SidebarProps) {
     };
 
     useEffect(() => {
-        // console.log("Worker loading");
-        toast({
-            title: "Web workers loading",
-            description: "Web workers are loading in the background",
-        });
-        const worker = new Worker(new URL("../../lib/worker", import.meta.url));
-        const api = wrap<WebWorker>(worker);
-        worker.onmessage = (event) => {
-            if (event.data.type === "CONTRACTS_COMPILED") {
-                toast({
-                    title: "Web workers loaded",
-                    description: "Web workers have been loaded successfully",
-                });
-                window.worker = api;
-            }
-        };
-    }, []);
+        if (hasMounted) {
+            const worker = new Worker(new URL("../../lib/worker", import.meta.url));
+            const api = wrap<WebWorker>(worker);
+
+            toast({
+                title: "Web workers loading",
+                description:
+                    "Our web workers working hard to getting ready things up, computer's fans could speed up a little 😬",
+            });
+            worker.onmessage = (event) => {
+                if (event.data.type === "CONTRACTS_COMPILED") {
+                    toast({
+                        title: "Web workers loaded",
+                        description: "Web workers have been loaded. Sorry for the noise 😅",
+                    });
+                    window.worker = api;
+                }
+            };
+        }
+    }, [hasMounted]);
 
     return (
         <div className={cn("flex flex-col justify-between h-screen border-r", className)}>
