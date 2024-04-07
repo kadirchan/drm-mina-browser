@@ -24,7 +24,7 @@ export default function WishlistItems() {
         }
     }, []);
 
-    return userStore.isConnected ? (
+    return (
         <div className=" flex w-full flex-wrap gap-4 justify-center">
             {gameStore.games
                 .filter((game: Game) => userStore.wishlist.includes(game.gameId))
@@ -56,12 +56,6 @@ export default function WishlistItems() {
                         </Card>
                     );
                 })}
-        </div>
-    ) : (
-        <div className="flex justify-center items-center h-[80vh]">
-            <h3 className="text-3xl font-medium">
-                Please connect your wallet to view your wishlist
-            </h3>
         </div>
     );
 }
