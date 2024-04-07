@@ -1,10 +1,21 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Store from "./store/page";
+import { useEffect } from "react";
+import { useDeviceStore } from "@/lib/stores/deviceStore";
+import useHasMounted from "@/lib/customHooks";
 
 export default function Home() {
     const params = useSearchParams()?.get("device");
-    console.log("params", params);
-    JSON.parse(params || "{}");
+    const router = useRouter();
+    const deviceStore = useDeviceStore();
+
+    useEffect(() => {
+        if (params) {
+            deviceStore.setDevice(JSON.parse(params));
+            router.replace("/");
+        }
+    }, []);
+
     return <Store />;
 }

@@ -14,6 +14,14 @@ declare global {
         releaseDate: string;
         tags: string[];
     }
+    interface RawIdentifiers {
+        cpuId: string;
+        systemSerial: string;
+        systemUUID: string;
+        baseboardSerial: string;
+        macAddress: string[];
+        diskSerial: string;
+    }
     interface Window {
         worker: undefined | Remote<WebWorker>;
 
