@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 const discountRateVariants = cva("absolute", {
     variants: {
         variant: {
-            md: "top-2 left-2 text-sm text-green-600 bg-green-900 rounded-lg p-1 hover:bg-green-800 border-double border-lime-950",
-            bg: "top-3 left-3 text-lg text-green-600 bg-green-900 rounded-lg p-2 hover:bg-green-800 border-double border-lime-950",
+            md: "top-2 left-2 text-sm text-discount bg-discount rounded-lg p-1 hover:bg-green-800 border border-lime-950",
+            bg: "top-3 left-3 text-lg text-discount bg-discount rounded-lg p-2 hover:bg-green-800 border border-lime-950",
         },
     },
     defaultVariants: {

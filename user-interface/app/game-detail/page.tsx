@@ -74,7 +74,7 @@ export default function GameDetail() {
                                 <div className=" flex gap-1 justify-center items-center ">
                                     {game?.discount || 0 > 0 ? (
                                         <>
-                                            <div className=" text-lg text-green-600 bg-green-900 rounded-lg p-1">
+                                            <div className=" text-lg text-discount bg-discount rounded-lg p-1">
                                                 -%
                                                 {Math.floor(
                                                     ((game?.discount || 0) / (game?.price || 1)) *

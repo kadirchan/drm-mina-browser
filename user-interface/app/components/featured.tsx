@@ -8,7 +8,14 @@ import {
     CarouselPreviousBig,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardShadow,
+    CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { fetchGameData, fetchWishlist } from "@/lib/api";
 import { useRouter } from "next/navigation";
@@ -63,7 +70,7 @@ export default function Featured() {
                                     <CardFooter className="w-full flex justify-between">
                                         <CardTitle>{game.name}</CardTitle>
                                         <div className=" flex flex-row mt-8 p-2 gap-3">
-                                            <div className=" flex gap-1 justify-center items-center bg-gray-800 px-3 rounded-sm">
+                                            <CardShadow className=" flex gap-1 justify-center items-center px-3 py-1 rounded-sm">
                                                 {game?.discount || 0 > 0 ? (
                                                     <span className="text-base strikethrough text-gray-500 px-2">
                                                         {game?.price}
@@ -79,7 +86,7 @@ export default function Featured() {
                                                     alt="mina"
                                                     className=" w-5 h-5 inline-block"
                                                 />
-                                            </div>
+                                            </CardShadow>
                                             <Button
                                                 variant={"default"}
                                                 onClick={(e) => {

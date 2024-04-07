@@ -7,6 +7,7 @@
         --background: 0 0% 100%;
         --foreground: 240 10% 3.9%;
         --card: 0 0% 100%;
+        --card-shadow: 0 0% 85%;
         --card-foreground: 240 10% 3.9%;
         --popover: 0 0% 100%;
         --popover-foreground: 240 10% 3.9%;
@@ -24,18 +25,19 @@
         --input: 240 5.9% 90%;
         --ring: 346.8 77.2% 49.8%;
         --radius: 0.5rem;
-        --discount: 134 239 172;
-        --discount-bg: 22 163 74;
+        --discount: 110 100 45;
+        --discount-bg: 110 100 20;
     }
 
     .dark {
         --background: 20 14.3% 4.1%;
         --foreground: 0 0% 95%;
         --card: 24 9.8% 10%;
+        --card-shadow: 24 9.8% 8%;
         --card-foreground: 0 0% 95%;
         --popover: 0 0% 9%;
         --popover-foreground: 0 0% 95%;
-        --primary: 346.8 77.2% 49.8%;
+        --primary: 346.8 90% 35%;
         --primary-foreground: 355.7 100% 97.3%;
         --secondary: 240 3.7% 15.9%;
         --secondary-foreground: 0 0% 98%;
@@ -48,8 +50,8 @@
         --border: 240 3.7% 15.9%;
         --input: 240 3.7% 15.9%;
         --ring: 346.8 77.2% 49.8%;
-        --discount: 22 163 74;
-        --discount-bg: 20 83 45;
+        --discount: 130 75 35;
+        --discount-bg: 130 75 15;
     }
 }
 
@@ -71,12 +73,24 @@
     left: 0;
     top: 50%;
     right: 0;
-    border-top: 1px solid;
-    border-color: gray;
+    border-top: 2px solid;
+    border-color: rgb(131, 131, 131);
 
-    -webkit-transform: rotate(-20deg);
-    -moz-transform: rotate(-20deg);
-    -ms-transform: rotate(-20deg);
-    -o-transform: rotate(-20deg);
-    transform: rotate(-20deg);
+    -webkit-transform: rotate(-18deg);
+    -moz-transform: rotate(-18deg);
+    -ms-transform: rotate(-18deg);
+    -o-transform: rotate(-18deg);
+    transform: rotate(-18deg);
+}
+
+.bg-card-shadow {
+    background-color: hsl(var(--card-shadow));
+}
+
+.bg-discount {
+    background-color: hsl(var(--discount-bg));
+}
+
+.text-discount {
+    color: hsl(var(--discount));
 }

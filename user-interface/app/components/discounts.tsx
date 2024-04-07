@@ -8,7 +8,14 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardShadow,
+    CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -71,12 +78,12 @@ export default function Discounts() {
                                     </CardContent>
                                     <CardFooter className="w-</CardContent>full flex justify-between">
                                         <CardTitle className=" text-base">{game.name}</CardTitle>
-                                        <div className=" flex flex-col justify-center items-start bg-gray-800 px-3 rounded-sm">
+                                        <CardShadow className=" flex flex-col justify-center items-start px-3 rounded-sm">
                                             <span className=" text-xs strikethrough text-gray-500">
                                                 &nbsp;{game?.price}&nbsp;
                                             </span>
                                             <div className="flex justify-center items-center gap-1">
-                                                <span className=" text-lg text-green-400">
+                                                <span className=" text-lg">
                                                     {game?.price - game?.discount}
                                                 </span>
                                                 <img
@@ -85,7 +92,7 @@ export default function Discounts() {
                                                     className=" w-4 h-4 inline-block"
                                                 />
                                             </div>
-                                        </div>
+                                        </CardShadow>
                                     </CardFooter>
                                 </Card>
                             </div>

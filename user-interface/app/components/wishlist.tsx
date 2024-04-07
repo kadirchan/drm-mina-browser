@@ -33,7 +33,7 @@ export default function WishlistItems() {
                         <Card
                             key={index}
                             className=" card-hover-effect aspect-square w-[300px] cursor-pointer mb-16"
-                            onClick={() => router.push("/game-detail?" + game.name)}
+                            onClick={() => router.push("/game-detail?game=" + game.name)}
                         >
                             <CardContent className=" absolute p-4 flex justify-center items-center aspect-square w-[300px]">
                                 <img
