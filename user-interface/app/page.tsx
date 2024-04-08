@@ -6,14 +6,20 @@ import { useDeviceStore } from "@/lib/stores/deviceStore";
 import useHasMounted from "@/lib/customHooks";
 
 export default function Home() {
-    const params = useSearchParams()?.get("device");
+    const gameName = useSearchParams()?.get("game");
+    console.log("gameName", gameName);
+    const device = useSearchParams()?.get("device");
+    console.log("device", device);
+
     const router = useRouter();
     const deviceStore = useDeviceStore();
 
     useEffect(() => {
-        if (params) {
-            deviceStore.setDevice(JSON.parse(params));
-            router.replace("/");
+        if (device || gameName) {
+            if (device) {
+                deviceStore.setDevice(JSON.parse(device));
+            }
+            if (gameName) router.push("/game-detail?game=" + gameName);
         }
     }, []);
 

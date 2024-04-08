@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 
 import Autoplay from "embla-carousel-autoplay";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,22 +11,45 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useGamesStore } from "@/lib/stores/gameStore";
+import { useDeviceStore } from "@/lib/stores/deviceStore";
+import { useToast } from "@/components/ui/use-toast";
 
 const ENDPOINT = "http://localhost:8080/";
 
 export default function GameDetail() {
-    const gameId = useSearchParams().get("game");
+    const gameName = useSearchParams().get("game");
+    const device = useSearchParams().get("device");
+    const gameStore = useGamesStore();
+    const deviceStore = useDeviceStore();
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (device) {
+            if (deviceStore.isDeviceSet === false) {
+                deviceStore.setDevice(JSON.parse(device));
+                toast({
+                    title: "Device set",
+                    description:
+                        "We got your device information 🕵️, just kidding your information is only yours ✨",
+                });
+            }
+            router.push("/game-detail?game=" + gameName);
+        }
+    }, []);
+
     const router = useRouter();
 
-    const gameStore = useGamesStore();
-
-    const game = gameStore.games.find((game) => game.name === gameId);
+    const game = gameStore.games.find((game) => game.name === gameName);
 
     return (
         <div>
             <div className=" grid grid-cols-5 w-full p-4">
                 <div className=" col-span-3 h-full mt-8">
-                    <Button variant={"outline"} onClick={() => router.back()} className=" ml-4">
+                    <Button
+                        variant={"outline"}
+                        onClick={() => router.replace("/store")}
+                        className=" ml-4"
+                    >
                         <ChevronLeft size={24} /> Back to Store
                     </Button>
                     <Carousel

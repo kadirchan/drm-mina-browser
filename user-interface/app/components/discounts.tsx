@@ -8,32 +8,17 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardShadow,
-    CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { Badge } from "@/components/ui/badge";
-import { Bookmark } from "lucide-react";
-import { fetchGameData, toggleGameWishlist } from "@/lib/api";
+import { Card, CardContent, CardFooter, CardShadow, CardTitle } from "@/components/ui/card";
+import { fetchGameData } from "@/lib/api";
 import { useRouter } from "next/navigation";
-// import { shuffleArray } from "@/lib/helpers";
 import { useGamesStore } from "@/lib/stores/gameStore";
-import { useUserStore } from "@/lib/stores/userWallet";
 import GameBookmark from "./bookmark";
 import DiscountRate from "./discountRate";
 
 const ENDPOINT = "http://localhost:8080/";
 
 export default function Discounts() {
-    const { toast } = useToast();
     const gameStore = useGamesStore();
-    const userStore = useUserStore();
 
     const router = useRouter();
 

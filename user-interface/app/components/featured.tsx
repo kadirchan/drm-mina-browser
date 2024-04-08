@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
     Carousel,
     CarouselContent,
@@ -8,18 +8,9 @@ import {
     CarouselPreviousBig,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardShadow,
-    CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardShadow, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { fetchGameData, fetchWishlist } from "@/lib/api";
 import { useRouter } from "next/navigation";
-// import { shuffleArray } from "@/lib/helpers";
 import { useGamesStore } from "@/lib/stores/gameStore";
 import GameBookmark from "./bookmark";
 import DiscountRate from "./discountRate";
@@ -32,9 +23,6 @@ export default function Featured() {
     const router = useRouter();
     const { toast } = useToast();
 
-    useMemo(() => {
-        fetchGameData().then((data) => gameStore.setGames(data));
-    }, []);
     return (
         <div className="row-span-1 col-span-3 lg:col-span-5 flex justify-center py-8">
             <Carousel

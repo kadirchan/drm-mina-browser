@@ -4,7 +4,7 @@ import { toast } from "@/components/ui/use-toast";
 import { fetchWishlist } from "@/lib/api";
 import { useUserStore } from "@/lib/stores/userWallet";
 import { Wallet } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 
 export default function Web3wallet() {
     const userWallet = useUserStore();

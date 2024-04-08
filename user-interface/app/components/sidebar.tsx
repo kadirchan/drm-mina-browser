@@ -1,9 +1,8 @@
 "use client";
-
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Wallet, Bookmark, Store, Gamepad2, Shapes, Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,6 @@ import Link from "next/link";
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
@@ -21,12 +19,15 @@ import { wrap } from "comlink";
 import { WebWorker } from "@/lib/worker";
 import { useToast } from "@/components/ui/use-toast";
 import useHasMounted from "@/lib/customHooks";
+import { fetchGameData } from "@/lib/api";
+import { useGamesStore } from "@/lib/stores/gameStore";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
     const [currentPath, setCurrentPath] = useState<string>("/");
     const router = useRouter();
+    const gameStore = useGamesStore();
     const hasMounted = useHasMounted();
 
     const { toast } = useToast();
@@ -35,6 +36,10 @@ export function Sidebar({ className }: SidebarProps) {
         setCurrentPath(path);
         router.push(path);
     };
+
+    useMemo(() => {
+        fetchGameData().then((data) => gameStore.setGames(data));
+    }, []);
 
     useEffect(() => {
         if (hasMounted) {
@@ -97,14 +102,6 @@ export function Sidebar({ className }: SidebarProps) {
                             <Store className="mr-2 h-4 w-4" />
                             Store
                         </Button>
-                        {/* <Button
-                            variant={currentPath == "/browse" ? "secondary" : "ghost"}
-                            className="w-full justify-start"
-                            onClick={() => handleNavigate("/browse")}
-                        >
-                            <Search className="mr-2 h-4 w-4" />
-                            Browse
-                        </Button> */}
                         <Button
                             variant={currentPath == "/categories" ? "secondary" : "ghost"}
                             className="w-full justify-start"
