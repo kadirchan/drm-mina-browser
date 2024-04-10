@@ -90,30 +90,55 @@ export class GameToken extends TokenContract {
     return account.balance.getAndRequireEquals();
   }
 
+  /**
+   * Set the price of the game.
+   * Only the publisher can call this method.
+   * @param price Price of the game in nanoMina.
+   */
   @method setGamePrice(price: UInt64) {
     this.onlyPublisher();
     this.gamePrice.getAndRequireEquals();
     this.gamePrice.set(price);
   }
 
+  /**
+   * Set the discount amount for the game.
+   * Only the publisher can call this method.
+   * @param discount Discount amount for the game in nanoMina.
+   */
   @method setDiscount(discount: UInt64) {
     this.onlyPublisher();
     this.discount.getAndRequireEquals();
     this.discount.set(discount);
   }
 
+  /**
+   * Set the timeout interval for the proof to be valid.
+   * Only the publisher can call this method.
+   * @param interval Timeout interval for the proof to be valid.
+   */
   @method setTimeoutInterval(interval: UInt64) {
     this.onlyPublisher();
     this.timeoutInterval.getAndRequireEquals();
     this.timeoutInterval.set(interval);
   }
 
+  /**
+   * Set the maximum height of the device Merkle tree.
+   * Only the publisher can call this method.
+   * @param height Maximum height of the device Merkle tree.
+   */
   @method setMaxTreeHeight(height: UInt64) {
     this.onlyPublisher();
     this.maxTreeHeight.getAndRequireEquals();
     this.maxTreeHeight.set(height);
   }
 
+  /**
+   * Set the public key of the publisher of the game.
+   * Only the publisher can call this method.
+   * @param publisher Public key of the publisher of the game.
+   */
   @method setPublisher(publisher: PublicKey) {
     this.onlyPublisher();
     this.publisher.getAndRequireEquals();

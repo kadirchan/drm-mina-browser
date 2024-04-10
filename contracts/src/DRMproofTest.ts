@@ -12,7 +12,7 @@ import {
 import { GameToken } from './GameTokenContract.js';
 import { mockIdentifiers } from './mock.js';
 import { Identifiers, RawIdentifiers } from './Identifiers.js';
-import { DRM, DeviceMapTransition, MapUpdate } from './DRMproof.js';
+import { DRM } from './DRMproof.js';
 
 const proofsEnabled = false;
 (async () => {
@@ -175,7 +175,7 @@ const proofsEnabled = false;
   printState();
 
   // ----------------------------------------------------------------------------
-
+  /*
   const BobSignature = Signature.create(bob.privateKey, [BobDeviceHash]);
 
   previousRoot = Tree.getRoot();
@@ -206,4 +206,6 @@ const proofsEnabled = false;
 
   const rootAfterCallBob = drmContractInstance.getRoot();
   console.log('Root after call Bob: ', rootAfterCallBob.toString());
+  
+  */
 })();
