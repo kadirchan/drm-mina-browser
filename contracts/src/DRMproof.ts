@@ -5,6 +5,7 @@ import {
   MerkleMapWitness,
   Poseidon,
   PrivateKey,
+  Proof,
   Provable,
   PublicKey,
   Signature,
@@ -22,6 +23,7 @@ import { Identifiers } from './Identifiers.js';
 
 export class DRM extends SmartContract {
   @state(Field) deviceRoot = State<Field>();
+  @state(Field) sessionRoot = State<Field>();
   @state(PublicKey) gameTokenAddress = State<PublicKey>();
 
   @method addDevice(
@@ -61,6 +63,36 @@ export class DRM extends SmartContract {
     this.deviceRoot.set(newRoot);
   }
 
+  @method createSession(
+    witness: MerkleMapWitness,
+    oldSessionValue: Field,
+    newSessionValue: Field,
+    proof: DeviceSessionProof
+  ) {
+    proof.verify();
+    this.sessionRoot
+      .getAndRequireEquals()
+      .assertEquals(proof.publicInput.sessionMerkleRoot);
+
+    this.deviceRoot
+      .getAndRequireEquals()
+      .assertEquals(proof.publicInput.deviceMerkleRoot);
+
+    oldSessionValue.assertNotEquals(newSessionValue);
+
+    const [oldRoot, oldKey] = witness.computeRootAndKey(oldSessionValue);
+
+    oldKey.assertEquals(proof.publicOutput);
+
+    this.sessionRoot.getAndRequireEquals().assertEquals(oldRoot);
+
+    const [newRoot, newKey] = witness.computeRootAndKey(newSessionValue);
+
+    newKey.assertEquals(proof.publicOutput);
+
+    this.sessionRoot.set(newRoot);
+  }
+
   @method setGameTokenAddress(address: PublicKey) {
     this.gameTokenAddress.getAndRequireEquals();
     this.gameTokenAddress.set(address);
@@ -77,108 +109,35 @@ export class DRM extends SmartContract {
   }
 }
 
-export class MapUpdate extends Struct({
-  oldRoot: Field,
-  newRoot: Field,
-  key: Field,
-  oldValue: Field,
-  newValue: Field,
-  witness: MerkleMapWitness,
-}) {
-  static fromFields(fields: Field[]): MapUpdate {
-    return new MapUpdate({
-      oldRoot: fields[0],
-      newRoot: fields[1],
-      key: fields[2],
-      oldValue: fields[3],
-      newValue: fields[4],
-      witness: MerkleMapWitness.fromFields(fields.slice(5)),
-    });
-  }
-  toFields() {
-    return [
-      this.oldRoot,
-      this.newRoot,
-      this.key,
-      this.oldValue,
-      this.newValue,
-      ...this.witness.toFields(),
-    ];
-  }
-}
-
-export class DeviceMapTransition extends Struct({
-  oldRoot: Field,
-  newRoot: Field,
-  userAddress: PublicKey,
-}) {
-  static create(userAddress: PublicKey, update: MapUpdate) {
-    const addressHash = Poseidon.hash(userAddress.toFields());
-    const [witnessOldRoot, witnessOldKey] = update.witness.computeRootAndKey(
-      update.oldValue
-    );
-    witnessOldKey.assertEquals(addressHash);
-    witnessOldKey.assertEquals(update.key);
-    witnessOldRoot.assertEquals(update.oldRoot);
-
-    const [witnessNewRoot, witnessNewKey] = update.witness.computeRootAndKey(
-      update.newValue
-    );
-
-    witnessNewKey.assertEquals(addressHash);
-    witnessNewKey.assertEquals(update.key);
-    witnessNewRoot.assertEquals(update.newRoot);
-
-    return new DeviceMapTransition({
-      oldRoot: update.oldRoot,
-      newRoot: update.newRoot,
-      userAddress,
-    });
-  }
-  static assertEquals(a: DeviceMapTransition, b: DeviceMapTransition) {
-    a.oldRoot.assertEquals(b.oldRoot);
-    a.newRoot.assertEquals(b.newRoot);
-    a.userAddress.assertEquals(b.userAddress);
-  }
-}
-
-const DeviceUpdate = ZkProgram({
-  name: 'DeviceUpdate',
-  publicInput: Field,
-  publicOutputs: Field,
-  methods: {
-    validateDevice: {
-      privateInputs: [Identifiers],
-      method(commitment: Field, identifiers: Identifiers) {
-        commitment.assertEquals(Poseidon.hash(identifiers.toFields()));
-
-        // TODO add more checks
-
-        return commitment;
-      },
-    },
-  },
-});
-
-export class DRMUpdateProof extends ZkProgram.Proof(DeviceUpdate) {}
-
-export class SessionOutput extends Struct({
-  hash: Field,
-  timeStamp: Field,
+export class SessionPublicInput extends Struct({
+  deviceMerkleRoot: Field,
+  deviceMerkleWitness: MerkleMapWitness,
+  sessionMerkleRoot: Field,
 }) {}
 
-const CreateSessionProof = ZkProgram({
-  name: 'CreateSessionProof',
-  publicInput: Field,
-  publicOutputs: Field,
+const ValidateDevice = ZkProgram({
+  name: 'ValidateDevice',
+  publicInput: SessionPublicInput,
+  publicOutput: Field,
   methods: {
     validateDevice: {
       privateInputs: [Identifiers],
-      method(commitment: Field, identifiers: Identifiers) {
-        commitment.assertEquals(Poseidon.hash(identifiers.toFields()));
+      method(publicInput: SessionPublicInput, identifiers: Identifiers): Field {
+        const deviceRoot = publicInput.deviceMerkleRoot;
+        const deviceWitness = publicInput.deviceMerkleWitness;
 
-        return commitment;
+        const identifiersHash = identifiers.hash();
+        const [computedRoot, computedKey] =
+          deviceWitness.computeRootAndKey(identifiersHash);
+
+        deviceRoot.assertEquals(computedRoot);
+
+        return identifiersHash;
       },
     },
   },
 });
+
+export class DeviceSessionProof extends ZkProgram.Proof(ValidateDevice) {}
+
+// TODO add session constraints to addDevice method
