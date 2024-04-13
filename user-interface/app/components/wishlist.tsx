@@ -7,8 +7,6 @@ import { useGamesStore } from "@/lib/stores/gameStore";
 import { useEffect } from "react";
 import { fetchWishlist } from "@/lib/api";
 
-const ENDPOINT = "http://localhost:8080/";
-
 export default function WishlistItems() {
     const router = useRouter();
 
@@ -37,7 +35,7 @@ export default function WishlistItems() {
                         >
                             <CardContent className=" absolute p-4 flex justify-center items-center aspect-square w-[300px]">
                                 <img
-                                    src={ENDPOINT + game.cover}
+                                    src={process.env.NEXT_PUBLIC_ENDPOINT + game.cover}
                                     crossOrigin="anonymous"
                                     alt={game.name}
                                     className="w-full flex h-full object-cover rounded-lg card-image"

@@ -14,8 +14,6 @@ import { useGamesStore } from "@/lib/stores/gameStore";
 import { useDeviceStore } from "@/lib/stores/deviceStore";
 import { useToast } from "@/components/ui/use-toast";
 
-const ENDPOINT = "http://localhost:8080/";
-
 export default function GameDetail() {
     const gameName = useSearchParams().get("game");
     const device = useSearchParams().get("device");
@@ -67,7 +65,8 @@ export default function GameDetail() {
                             {Array.from({ length: 5 }).map((_, i) => (
                                 <CarouselItem key={i}>
                                     <img
-                                        src={ENDPOINT + game?.cover}
+                                        // @ts-ignore
+                                        src={process.env.NEXT_PUBLIC_ENDPOINT + game?.cover}
                                         crossOrigin="anonymous"
                                         alt="Game"
                                         className="w-full h-full object-cover aspect-video"

@@ -16,8 +16,6 @@ import GameBookmark from "./bookmark";
 import DiscountRate from "./discountRate";
 import { useToast } from "@/components/ui/use-toast";
 
-const ENDPOINT = "http://localhost:8080/";
-
 export default function Featured() {
     const gameStore = useGamesStore();
     const router = useRouter();
@@ -47,7 +45,7 @@ export default function Featured() {
                                 >
                                     <CardContent className="flex items-center justify-center p-6 lg:aspect-video md:aspect-square relative">
                                         <img
-                                            src={ENDPOINT + game.cover}
+                                            src={process.env.NEXT_PUBLIC_ENDPOINT + game.cover}
                                             crossOrigin="anonymous"
                                             alt={game.name}
                                             className="w-full h-full object-cover"

@@ -29,10 +29,12 @@ export default function Wishlist() {
             )}
         </div>
     ) : (
-        <div className="flex justify-center items-center h-[80vh]">
-            <h3 className="text-3xl font-medium">
-                Please connect your wallet to view your wishlist
-            </h3>
+        <div className=" p-8">
+            <div className="flex justify-center items-center h-[80vh]">
+                <h3 className="text-3xl font-medium">
+                    Please connect your wallet to view your wishlist
+                </h3>
+            </div>
         </div>
     );
 }

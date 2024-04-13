@@ -4,8 +4,6 @@ import { useGamesStore } from "@/lib/stores/gameStore";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const ENDPOINT = "http://localhost:8080/";
-
 export default function Browse() {
     const router = useRouter();
     const params = useSearchParams().get("search") || "";
@@ -32,7 +30,7 @@ export default function Browse() {
                 >
                     <CardContent className=" absolute p-4 flex justify-center items-center aspect-square w-[300px]">
                         <img
-                            src={ENDPOINT + game.cover}
+                            src={process.env.NEXT_PUBLIC_ENDPOINT + game.cover}
                             crossOrigin="anonymous"
                             alt={game.name}
                             className="w-full flex h-full object-cover rounded-lg"

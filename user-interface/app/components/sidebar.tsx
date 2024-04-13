@@ -27,7 +27,6 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 export function Sidebar({ className }: SidebarProps) {
     const [currentPath, setCurrentPath] = useState<string>("/");
     const router = useRouter();
-    const gameStore = useGamesStore();
     const hasMounted = useHasMounted();
 
     const { toast } = useToast();
@@ -36,10 +35,6 @@ export function Sidebar({ className }: SidebarProps) {
         setCurrentPath(path);
         router.push(path);
     };
-
-    useMemo(() => {
-        fetchGameData().then((data) => gameStore.setGames(data));
-    }, []);
 
     useEffect(() => {
         if (hasMounted) {

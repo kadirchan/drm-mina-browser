@@ -1,4 +1,4 @@
-const ENDPOINT = "http://localhost:8080/";
+const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT;
 
 export async function fetchGameData() {
     const headers = { "Content-Type": "application/json" };

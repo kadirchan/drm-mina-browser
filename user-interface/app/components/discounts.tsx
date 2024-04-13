@@ -15,8 +15,6 @@ import { useGamesStore } from "@/lib/stores/gameStore";
 import GameBookmark from "./bookmark";
 import DiscountRate from "./discountRate";
 
-const ENDPOINT = "http://localhost:8080/";
-
 export default function Discounts() {
     const gameStore = useGamesStore();
 
@@ -53,7 +51,7 @@ export default function Discounts() {
                                 >
                                     <CardContent className="relative flex items-center justify-center p-6 lg:aspect-3/4 md:aspect-square">
                                         <img
-                                            src={ENDPOINT + game.cover}
+                                            src={process.env.NEXT_PUBLIC_ENDPOINT + game.cover}
                                             crossOrigin="anonymous"
                                             alt={game.name}
                                             className="w-full h-full object-cover"
