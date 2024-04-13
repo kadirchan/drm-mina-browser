@@ -59,10 +59,10 @@ export class GameToken extends TokenContract {
 
     super.init();
 
-    this.gamePrice.set(UInt64.from(333334946));
-    this.discount.set(UInt64.from(2121));
-    this.timeoutInterval.set(UInt64.from(1000));
-    this.maxTreeHeight.set(UInt64.from(2));
+    this.gamePrice.set(UInt64.zero);
+    this.discount.set(UInt64.zero);
+    this.timeoutInterval.set(UInt64.zero);
+    this.maxTreeHeight.set(UInt64.zero);
   }
 
   @method mintGameToken(to: PublicKey) {
@@ -85,10 +85,10 @@ export class GameToken extends TokenContract {
     });
   }
 
-  @method getBalance(address: PublicKey): UInt64 {
-    const account = Account(address, this.deriveTokenId());
-    return account.balance.getAndRequireEquals();
-  }
+  // @method getBalance(address: PublicKey): UInt64 {
+  //   const account = Account(address, this.deriveTokenId());
+  //   return account.balance.getAndRequireEquals();
+  // }
 
   /**
    * Set the price of the game.
