@@ -13,6 +13,11 @@ import {
 const proofsEnabled = false;
 
 describe('GameToken', () => {
+  const GAMEPRICE = 1000;
+  const DISCOUNT = 100;
+  const TIMEOUTINTERVAL = 100;
+  const MAXTREEHEIGHT = 2;
+
   const Local = Mina.LocalBlockchain({ proofsEnabled });
   Mina.setActiveInstance(Local);
   const deployer = Local.testAccounts[0];
@@ -40,6 +45,18 @@ describe('GameToken', () => {
     await deployTxn.sign([deployer.privateKey, GameTokenSk]).send();
   });
 
+  it('deployer set contract states', async () => {
+    const setPriceTxn = await Mina.transaction(deployer.publicKey, () => {
+      GameTokenInstance.setGamePrice(UInt64.from(GAMEPRICE));
+      GameTokenInstance.setDiscount(UInt64.from(DISCOUNT));
+      GameTokenInstance.setTimeoutInterval(UInt64.from(TIMEOUTINTERVAL));
+      GameTokenInstance.maxTreeHeight.set(UInt64.from(MAXTREEHEIGHT));
+    });
+
+    await setPriceTxn.prove();
+    await setPriceTxn.sign([deployer.privateKey]).send();
+  });
+
   it('Alice can buy GameToken', async () => {
     const deployerPreviousBalance = Mina.getBalance(
       deployer.publicKey
@@ -60,8 +77,12 @@ describe('GameToken', () => {
       ).toBigInt()
     ).toEqual(1n);
 
-    expect(Mina.getBalance(deployer.publicKey).toBigInt()).toEqual(
-      deployerPreviousBalance + 33333n
+    const deployerCurrentBalance = Mina.getBalance(
+      deployer.publicKey
+    ).toBigInt();
+
+    expect(Number(deployerCurrentBalance - deployerPreviousBalance)).toEqual(
+      GAMEPRICE - DISCOUNT
     );
   });
 
@@ -96,13 +117,17 @@ describe('GameToken', () => {
       ).toBigInt()
     ).toEqual(1n);
 
-    expect(Mina.getBalance(deployer.publicKey).toBigInt()).toEqual(
-      deployerPreviousBalance + 33333n
+    const deployerCurrentBalance = Mina.getBalance(
+      deployer.publicKey
+    ).toBigInt();
+
+    expect(Number(deployerCurrentBalance - deployerPreviousBalance)).toEqual(
+      GAMEPRICE - DISCOUNT
     );
   });
 
   it('Publisher can set game price', async () => {
-    const price = UInt64.from(1000);
+    const price = UInt64.from(2000);
     const setPriceTxn = await Mina.transaction(deployer.publicKey, () => {
       GameTokenInstance.setGamePrice(price);
     });
@@ -112,7 +137,7 @@ describe('GameToken', () => {
   });
 
   it('Publisher can set discount', async () => {
-    const discount = UInt64.from(100);
+    const discount = UInt64.from(200);
     const setDiscountTxn = await Mina.transaction(deployer.publicKey, () => {
       GameTokenInstance.setDiscount(discount);
     });
@@ -122,7 +147,7 @@ describe('GameToken', () => {
   });
 
   it('Publisher can set timeout interval', async () => {
-    const interval = UInt64.from(100);
+    const interval = UInt64.from(200);
     const setTimeoutTxn = await Mina.transaction(deployer.publicKey, () => {
       GameTokenInstance.setTimeoutInterval(interval);
     });
@@ -131,8 +156,18 @@ describe('GameToken', () => {
     expect(GameTokenInstance.timeoutInterval.get()).toEqual(interval);
   });
 
+  it('Publisher can set max tree height', async () => {
+    const height = UInt64.from(3);
+    const setHeightTxn = await Mina.transaction(deployer.publicKey, () => {
+      GameTokenInstance.setMaxTreeHeight(height);
+    });
+    await setHeightTxn.prove();
+    await setHeightTxn.sign([deployer.privateKey]).send();
+    expect(UInt64.from(GameTokenInstance.maxTreeHeight.get())).toEqual(height);
+  });
+
   it('Alice can not set game price', async () => {
-    const price = UInt64.from(1000);
+    const price = UInt64.from(1500);
     try {
       const setPriceTxn = await Mina.transaction(alice.publicKey, () => {
         GameTokenInstance.setGamePrice(price);
@@ -146,7 +181,7 @@ describe('GameToken', () => {
   });
 
   it('Alice can not set discount', async () => {
-    const discount = UInt64.from(100);
+    const discount = UInt64.from(150);
     try {
       const setDiscountTxn = await Mina.transaction(alice.publicKey, () => {
         GameTokenInstance.setDiscount(discount);
@@ -160,7 +195,7 @@ describe('GameToken', () => {
   });
 
   it('Alice can not set timeout interval', async () => {
-    const interval = UInt64.from(100);
+    const interval = UInt64.from(150);
     try {
       const setTimeoutTxn = await Mina.transaction(alice.publicKey, () => {
         GameTokenInstance.setTimeoutInterval(interval);
@@ -170,6 +205,20 @@ describe('GameToken', () => {
       throw new Error('Alice should not be able to set timeout interval');
     } catch (e) {
       console.log('Alice can not set timeout interval');
+    }
+  });
+
+  it('Alice can not set max tree height', async () => {
+    const height = UInt64.from(2);
+    try {
+      const setHeightTxn = await Mina.transaction(alice.publicKey, () => {
+        GameTokenInstance.setMaxTreeHeight(height);
+      });
+      await setHeightTxn.prove();
+      await setHeightTxn.sign([alice.privateKey]).send();
+      throw new Error('Alice should not be able to set max tree height');
+    } catch (e) {
+      console.log('Alice can not set max tree height');
     }
   });
 });

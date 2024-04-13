@@ -24,7 +24,6 @@ describe('GameToken', () => {
 
   const deployer = Local.testAccounts[0];
   const alice = Local.testAccounts[1];
-  const bob = Local.testAccounts[2];
 
   const GameTokenKey = PrivateKey.random();
   const GameTokenAddr = GameTokenKey.toPublicKey();
@@ -40,6 +39,7 @@ describe('GameToken', () => {
   beforeAll(async () => {
     if (proofsEnabled) {
       await GameToken.compile();
+      await DRM.compile();
     }
   });
 
@@ -94,27 +94,20 @@ describe('GameToken', () => {
     ).toEqual(1n);
   });
 
-  const AliceDeviceRaw = mockIdentifiers[0];
-  const AliceDeviceIdentifiers = Identifiers.fromRaw(AliceDeviceRaw);
-  const AliceDeviceHash = AliceDeviceIdentifiers.hash();
-  const AliceSignature = Signature.create(alice.privateKey, [AliceDeviceHash]);
-
-  const BobDeviceRaw = mockIdentifiers[1];
-  const BobDeviceIdentifiers = Identifiers.fromRaw(BobDeviceRaw);
-  const BobDeviceHash = BobDeviceIdentifiers.hash();
-
-  let previousRoot = Tree.getRoot();
-  let previousValue = Tree.get(Poseidon.hash(alice.publicKey.toFields()));
-
-  Tree.set(Poseidon.hash(alice.publicKey.toFields()), AliceDeviceHash);
-  let newRoot = Tree.getRoot();
-  let newValue = Tree.get(Poseidon.hash(alice.publicKey.toFields()));
-
-  let AliceWitness = Tree.getWitness(Poseidon.hash(alice.publicKey.toFields()));
-
-  //   const rootBeforeCall = drmContractInstance.getRoot();
-
   it('Alice updates device', async () => {
+    const AliceDeviceRaw = mockIdentifiers[0];
+    const AliceDeviceIdentifiers = Identifiers.fromRaw(AliceDeviceRaw);
+    const AliceDeviceHash = AliceDeviceIdentifiers.hash();
+    const AliceSignature = Signature.create(alice.privateKey, [
+      AliceDeviceHash,
+    ]);
+
+    let previousValue = Tree.get(Poseidon.hash(alice.publicKey.toFields()));
+    Tree.set(Poseidon.hash(alice.publicKey.toFields()), AliceDeviceHash);
+    let AliceWitness = Tree.getWitness(
+      Poseidon.hash(alice.publicKey.toFields())
+    );
+
     const updateTxn = await Mina.transaction(alice.publicKey, () => {
       drmContractInstance.addDevice(
         alice.publicKey,
@@ -129,6 +122,8 @@ describe('GameToken', () => {
     await updateTxn.sign([alice.privateKey]).send();
 
     const rootAfterCall = drmContractInstance.getRoot();
-    expect(rootAfterCall).toEqual(newRoot);
+    expect(rootAfterCall).toEqual(
+      AliceWitness.computeRootAndKey(AliceDeviceHash)[0]
+    );
   });
 });
