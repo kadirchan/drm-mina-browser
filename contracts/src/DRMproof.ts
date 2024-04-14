@@ -23,12 +23,12 @@ export class SessionPublicInput extends Struct({
   sessionMerkleRoot: Field,
 }) {}
 
-const ValidateDevice = ZkProgram({
+export const ValidateDevice = ZkProgram({
   name: 'ValidateDevice',
   publicInput: SessionPublicInput,
   publicOutput: Field,
   methods: {
-    validateDevice: {
+    proofForSession: {
       privateInputs: [Identifiers],
       method(publicInput: SessionPublicInput, identifiers: Identifiers): Field {
         const deviceRoot = publicInput.deviceMerkleRoot;
@@ -62,8 +62,8 @@ export class DRM extends SmartContract {
     devicePreviousValue: Field,
     identifiers: Identifiers,
     deviceWitness: MerkleMapWitness,
-    signature: Signature
-    // ,sessionWitness: MerkleMapWitness
+    signature: Signature,
+    sessionWitness: MerkleMapWitness
   ) {
     const gameTokenId = TokenId.derive(
       this.gameTokenAddress.getAndRequireEquals()
@@ -101,12 +101,15 @@ export class DRM extends SmartContract {
      * otherwise device is enabled
      */
 
-    // const [computedSessionRoot, computedSessionKey] = sessionWitness.computeRootAndKey(Field.from(0))
-    // computedSessionKey.assertEquals(identifiersHash)
-    // computedSessionRoot.assertEquals(this.sessionRoot.getAndRequireEquals())
+    const [computedSessionRoot, computedSessionKey] =
+      sessionWitness.computeRootAndKey(Field.from(0));
+    computedSessionKey.assertEquals(identifiersHash);
+    computedSessionRoot.assertEquals(this.sessionRoot.getAndRequireEquals());
 
-    // const [newSessionRoot, newSessionKey] = sessionWitness.computeRootAndKey(Field.from(1))
-    // this.sessionRoot.set(newSessionRoot)
+    const [newSessionRoot, newSessionKey] = sessionWitness.computeRootAndKey(
+      Field.from(1)
+    );
+    this.sessionRoot.set(newSessionRoot);
   }
 
   @method createSession(
@@ -151,13 +154,24 @@ export class DRM extends SmartContract {
     this.gameTokenAddress.set(address);
   }
 
-  @method getRoot() {
+  // TODO: Remove after testing
+  @method getDeviceRoot() {
     return this.deviceRoot.getAndRequireEquals();
+  }
+
+  // TODO: Remove after testing
+  @method getSessionRoot() {
+    return this.sessionRoot.getAndRequireEquals();
   }
 
   // TODO: Remove after testing
   @method setDeviceRoot(root: Field) {
     this.deviceRoot.getAndRequireEquals();
     this.deviceRoot.set(root);
+  }
+  // TODO: Remove after testing
+  @method setSessionRoot(root: Field) {
+    this.sessionRoot.getAndRequireEquals();
+    this.sessionRoot.set(root);
   }
 }

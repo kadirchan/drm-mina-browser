@@ -1,14 +1,6 @@
 import { GameToken } from './GameTokenContract.js';
 
-import {
-  Field,
-  Mina,
-  PrivateKey,
-  AccountUpdate,
-  UInt64,
-  Account,
-  Provable,
-} from 'o1js';
+import { Mina, PrivateKey, AccountUpdate, UInt64 } from 'o1js';
 
 const proofsEnabled = false;
 
@@ -49,8 +41,8 @@ describe('GameToken', () => {
     const setPriceTxn = await Mina.transaction(deployer.publicKey, () => {
       GameTokenInstance.setGamePrice(UInt64.from(GAMEPRICE));
       GameTokenInstance.setDiscount(UInt64.from(DISCOUNT));
-      GameTokenInstance.setTimeoutInterval(UInt64.from(TIMEOUTINTERVAL));
-      GameTokenInstance.maxTreeHeight.set(UInt64.from(MAXTREEHEIGHT));
+      // GameTokenInstance.setTimeoutInterval(UInt64.from(TIMEOUTINTERVAL));
+      // GameTokenInstance.maxTreeHeight.set(UInt64.from(MAXTREEHEIGHT));
     });
 
     await setPriceTxn.prove();

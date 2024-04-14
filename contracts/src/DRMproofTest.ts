@@ -97,8 +97,6 @@ const proofsEnabled = false;
   const drmDeployTxn = await Mina.transaction(deployer.publicKey, () => {
     AccountUpdate.fundNewAccount(deployer.publicKey);
     drmContractInstance.deploy({ zkappKey: drmContractKey });
-    // drmContractInstance.setGameTokenAddress(GameTokenAddr);
-    // drmContractInstance.setDeviceRoot(Tree.getRoot());
   });
 
   await drmDeployTxn.prove();
@@ -128,10 +126,10 @@ const proofsEnabled = false;
 
   printState();
 
-  const balanceTxn = await Mina.transaction(alice.publicKey, () => {
-    const balance = GameTokenInstance.getBalance(alice.publicKey);
-    console.log('Alice balance:', balance);
-  });
+  // const balanceTxn = await Mina.transaction(alice.publicKey, () => {
+  //   const balance = GameTokenInstance.getBalance(alice.publicKey);
+  //   console.log('Alice balance:', balance);
+  // });
   // ----------------------------------------------------------------------------
 
   const AliceDeviceRaw = mockIdentifiers[0];
@@ -145,6 +143,7 @@ const proofsEnabled = false;
 
   let previousRoot = Tree.getRoot();
   let previousValue = Tree.get(Poseidon.hash(alice.publicKey.toFields()));
+  console.log('previous Value', previousValue.value);
 
   Tree.set(Poseidon.hash(alice.publicKey.toFields()), AliceDeviceHash);
   let newRoot = Tree.getRoot();
@@ -152,24 +151,27 @@ const proofsEnabled = false;
 
   let AliceWitness = Tree.getWitness(Poseidon.hash(alice.publicKey.toFields()));
 
-  const rootBeforeCall = drmContractInstance.getRoot();
+  const rootBeforeCall = drmContractInstance.getDeviceRoot();
   console.log('Root before call: ', rootBeforeCall.toString());
 
+  const sessionTree = new MerkleMap();
+  const sessionWitness = sessionTree.getWitness(AliceDeviceHash);
+
   const updateTxn = await Mina.transaction(alice.publicKey, () => {
-    // AccountUpdate.fundNewAccount(alice.publicKey);
     drmContractInstance.addDevice(
       alice.publicKey,
       previousValue,
       AliceDeviceIdentifiers,
       AliceWitness,
-      AliceSignature
+      AliceSignature,
+      sessionWitness
     );
   });
 
   await updateTxn.prove();
   await updateTxn.sign([alice.privateKey]).send();
 
-  const rootAfterCall = drmContractInstance.getRoot();
+  const rootAfterCall = drmContractInstance.getDeviceRoot();
   console.log('Root after call: ', rootAfterCall.toString());
 
   printState();
