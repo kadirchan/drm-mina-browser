@@ -15,12 +15,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { wrap } from "comlink";
-import { WebWorker } from "@/lib/worker";
 import { useToast } from "@/components/ui/use-toast";
 import useHasMounted from "@/lib/customHooks";
 import { fetchGameData } from "@/lib/api";
 import { useGamesStore } from "@/lib/stores/gameStore";
+import { useWorkerStore } from "@/lib/stores/workerStore";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -28,6 +27,7 @@ export function Sidebar({ className }: SidebarProps) {
     const [currentPath, setCurrentPath] = useState<string>("/");
     const router = useRouter();
     const gameStore = useGamesStore();
+    const workerStore = useWorkerStore();
     const hasMounted = useHasMounted();
 
     const { toast } = useToast();
@@ -42,24 +42,13 @@ export function Sidebar({ className }: SidebarProps) {
     }, []);
 
     useEffect(() => {
-        if (hasMounted) {
-            const worker = new Worker(new URL("../../lib/worker", import.meta.url));
-            const api = wrap<WebWorker>(worker);
-
+        if (hasMounted && workerStore.status === 0) {
+            workerStore.startWorker();
             toast({
                 title: "Web workers loading",
                 description:
                     "Our web workers working hard to getting ready things up, computer's fans could speed up a little 😬",
             });
-            worker.onmessage = (event) => {
-                if (event.data.type === "CONTRACTS_COMPILED") {
-                    toast({
-                        title: "Web workers loaded",
-                        description: "Web workers have been loaded. Sorry for the noise 😅",
-                    });
-                    window.worker = api;
-                }
-            };
         }
     }, [hasMounted]);
 
@@ -132,7 +121,13 @@ export function Sidebar({ className }: SidebarProps) {
             </div>
             <div className="px-6 flex w-full justify-between self-end absolute bottom-4">
                 <ModeToggle />{" "}
-                <Badge className=" rounded-lg text-center items-center" variant="outline">
+                <Badge
+                    className=" rounded-lg text-center items-center"
+                    variant="outline"
+                    onClick={() => {
+                        console.log(workerStore.status);
+                    }}
+                >
                     v0.0.1
                 </Badge>
             </div>
