@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
 
 interface UserState {
     isConnected: boolean;
@@ -6,7 +7,6 @@ interface UserState {
     userPublicKey?: string;
     userMinaBalance: number;
     wishlist: number[];
-    // wishlistFlag: boolean;
     library: number[];
 
     setConnected: (connected: boolean) => void;
@@ -16,39 +16,66 @@ interface UserState {
     setWishlist: (wishlist: number[]) => void;
     addWishlist: (gameId: number) => void;
     removeWishlist: (gameId: number) => void;
-    // setFlag: () => void;
-    // nullifyFlag: () => void;
     setLibrary: (library: number[]) => void;
     disconnect: () => void;
 }
 
-export const useUserStore = create<UserState>()((set) => ({
-    isConnected: false,
-    isConnecting: false,
-    userPublicKey: "",
-    userMinaBalance: 0,
-    wishlist: [],
-    // wishlistFlag: false,
-    library: [],
+export const useUserStore = create<UserState, [["zustand/immer", never]]>(
+    immer((set) => ({
+        isConnected: false,
+        isConnecting: false,
+        userMinaBalance: 0,
+        wishlist: [],
+        library: [],
 
-    setConnected: (connected) => set({ isConnected: connected }),
-    setConnecting: (connecting) => set({ isConnecting: connecting }),
-    setUserPublicKey: (publicKey) => set({ userPublicKey: publicKey }),
-    setUserMinaBalance: (balance) => set({ userMinaBalance: balance }),
-    addWishlist: (gameId) => set((state) => ({ wishlist: [...state.wishlist, gameId] })),
-    removeWishlist: (gameId) =>
-        set((state) => ({ wishlist: state.wishlist.filter((id) => id !== gameId) })),
-    setWishlist: (wishlist) => set({ wishlist }),
-    // setFlag: () => set({ wishlistFlag: true }),
-    // nullifyFlag: () => set({ wishlistFlag: false }),
-    setLibrary: (library) => set({ library }),
-    disconnect: () =>
-        set({
-            isConnected: false,
-            isConnecting: false,
-            userPublicKey: "",
-            userMinaBalance: 0,
-            wishlist: [],
-            library: [],
-        }),
-}));
+        setConnected(connected) {
+            set((state) => {
+                state.isConnected = connected;
+            });
+        },
+        setConnecting(connecting) {
+            set((state) => {
+                state.isConnecting = connecting;
+            });
+        },
+        setUserPublicKey(publicKey) {
+            set((state) => {
+                state.userPublicKey = publicKey;
+            });
+        },
+        setUserMinaBalance(balance) {
+            set((state) => {
+                state.userMinaBalance = balance;
+            });
+        },
+        setWishlist(wishlist) {
+            set((state) => {
+                state.wishlist = wishlist;
+            });
+        },
+        addWishlist(gameId) {
+            set((state) => {
+                state.wishlist.push(gameId);
+            });
+        },
+        removeWishlist(gameId) {
+            set((state) => {
+                state.wishlist = state.wishlist.filter((id) => id !== gameId);
+            });
+        },
+        setLibrary(library) {
+            set((state) => {
+                state.library = library;
+            });
+        },
+        disconnect() {
+            set((state) => {
+                state.isConnected = false;
+                state.userPublicKey = undefined;
+                state.userMinaBalance = 0;
+                state.wishlist = [];
+                state.library = [];
+            });
+        },
+    }))
+);
