@@ -3,11 +3,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "@/components/ui/use-toast";
 import { fetchWishlist } from "@/lib/api";
 import { useUserStore } from "@/lib/stores/userWallet";
+import { useWorkerStore } from "@/lib/stores/workerStore";
 import { Wallet } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 
 export default function Web3wallet() {
     const userWallet = useUserStore();
+    const workerStore = useWorkerStore();
 
     const connect = async () => {
         userWallet.setConnecting(true);
@@ -24,12 +26,22 @@ export default function Web3wallet() {
             userWallet.setUserPublicKey(addresses[0]);
             userWallet.setConnected(true);
             userWallet.setConnecting(false);
-            // const balance = await Mina.getBalance(addresses[0]);
-            // setUserMinaBalance(balance);
             const wishlist = await fetchWishlist(addresses[0]);
             userWallet.setWishlist(wishlist);
         }
     };
+
+    useEffect(() => {
+        (async () => {
+            if (workerStore.status > 1 && userWallet.isConnected) {
+                console.log(userWallet.userPublicKey);
+                const res = await workerStore.worker?.getBalance({
+                    publicKey: userWallet.userPublicKey!,
+                });
+                userWallet.setUserMinaBalance(res! / 1000000000);
+            }
+        })();
+    }, [workerStore.status, userWallet.isConnected]);
 
     const disconnect = async () => {
         userWallet.disconnect();

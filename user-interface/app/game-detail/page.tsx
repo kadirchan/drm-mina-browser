@@ -6,13 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { ChevronLeft, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import CommentSection from "./commentSection";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useGamesStore } from "@/lib/stores/gameStore";
 import { useDeviceStore } from "@/lib/stores/deviceStore";
 import { useToast } from "@/components/ui/use-toast";
+import { useUserStore } from "@/lib/stores/userWallet";
 
 const ENDPOINT = "http://localhost:8080/";
 
@@ -21,6 +20,7 @@ export default function GameDetail() {
     const device = useSearchParams().get("device");
     const gameStore = useGamesStore();
     const deviceStore = useDeviceStore();
+    const userStore = useUserStore();
     const { toast } = useToast();
 
     useEffect(() => {
@@ -40,6 +40,29 @@ export default function GameDetail() {
     const router = useRouter();
 
     const game = gameStore.games.find((game) => game.name === gameName);
+
+    const handleGameBuy = () => {
+        if (userStore.isConnected === false) {
+            toast({
+                title: "Wallet not connected",
+                description: "Please connect your wallet",
+            });
+            return;
+        }
+        console.log("Buying game");
+        window.worker?.getBalance({ address: userStore.userPublicKey }).then((balance) => {
+            userStore.setUserMinaBalance(balance);
+            console.log(balance);
+        });
+        // if (ContractState.status === "loading") {
+        //     toast({
+        //         title: "Contracts not loaded",
+        //         description: "Please wait for the contracts to load",
+        //     });
+        //     return;
+        // }
+    };
+    const handleGameDownload = () => {};
 
     return (
         <div>
@@ -120,11 +143,11 @@ export default function GameDetail() {
                                         className=" w-4 h-4 inline-block"
                                     />
                                 </div>
-                                <Button variant={"default"} className="">
+                                <Button variant={"default"} onClick={handleGameBuy}>
                                     Buy Game
                                 </Button>
                             </div>
-                            <Button variant={"link"} className="">
+                            <Button variant={"link"} onClick={handleGameDownload}>
                                 <Download size={24} />
                                 Download Game
                             </Button>
